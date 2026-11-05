@@ -2,7 +2,10 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#4f46e5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <title>HomeworkCheck – เช็คส่งการบ้าน</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -157,6 +160,124 @@ td.c,th.c{text-align:center}
   th{position:static}
 }
 .printonly{display:none}
+.autoclose{margin:2px 0 8px;font-weight:600;flex-wrap:wrap}
+.scanbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 6px}
+.scanbar .btn{padding:12px 28px;font-size:16px}
+@media (max-width:700px){.scanbar .btn{flex:1;justify-content:center;padding:14px}.scanbar span{flex:0 0 auto}#qr-reader video{max-height:46vh;object-fit:cover}}
+
+/* ---------- desktop defaults for new markup ---------- */
+.addgrid{grid-template-columns:80px 130px 110px 1fr 1fr auto;align-items:end}
+.repsel{width:auto;min-width:180px}
+.sp{flex:1}
+.repbtns{display:flex;gap:8px;flex-wrap:wrap}
+nav button i{font-style:normal;margin-right:5px} nav button b{display:none}
+#fab{display:none}
+/* ---------- MOBILE ---------- */
+@media (max-width:700px){
+  body{font-size:14.5px;padding-bottom:calc(72px + env(safe-area-inset-bottom));-webkit-tap-highlight-color:transparent}
+  input.f,select.f,textarea.f{font-size:16px} /* prevent iOS zoom */
+  header{position:sticky}
+  .hwrap{padding:calc(8px + env(safe-area-inset-top)) 12px 8px}
+  .htop{flex-wrap:nowrap;gap:8px}
+  .logo{font-size:16px;gap:6px;min-width:0}
+  .logo i{width:26px;height:26px;font-size:14px;flex:0 0 auto}
+  body.can-scan[data-tab=check] main{padding-bottom:96px}
+  .hright{gap:6px;min-width:0}
+  html,body{overflow-x:clip}
+  .logo{flex:1 1 auto;overflow:hidden;white-space:nowrap}
+  .hright{flex:0 1 auto}
+  .pillw{font-size:11px;padding:4px 8px;white-space:nowrap;max-width:80px;overflow:hidden;text-overflow:ellipsis}
+  .hsel{max-width:104px;padding:6px 4px;font-size:14px}
+  /* bottom tab bar */
+  nav{position:fixed;left:0;right:0;bottom:0;margin:0;z-index:40;background:#fff;border-top:1px solid var(--line);box-shadow:0 -4px 16px rgba(30,35,80,.08);padding:4px 4px calc(4px + env(safe-area-inset-bottom));gap:0;overflow:visible}
+  nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 0 5px;border-radius:10px;color:#7a7f99;font-size:11px;min-width:0}
+  nav button i{margin:0;font-size:19px;line-height:1.2;filter:grayscale(.6);opacity:.75}
+  nav button span{display:none} nav button b{display:block;font-weight:700}
+  nav button.on{background:#eef0ff;color:var(--pri)}
+  nav button.on i{filter:none;opacity:1}
+  nav button:hover{background:#f5f5fb}
+  main{padding:12px 10px 20px}
+  .card{padding:13px;border-radius:13px;margin-bottom:10px}
+  h2{font-size:17px}
+  /* subject pills scroll */
+  .pills{flex-wrap:nowrap;overflow-x:auto;margin:0 -10px 10px;padding:2px 10px 4px;scrollbar-width:none}
+  .pills::-webkit-scrollbar{display:none}
+  .pill{flex:0 0 auto;padding:7px 14px}
+  /* check header */
+  .chead{flex-direction:column;gap:10px}
+  .apick{width:100%}
+  .apick select{flex:1;min-width:0;max-width:none}
+  .apick .btn{padding:9px 11px}
+  .note{margin:10px 0;padding:2px 12px}
+  .stats{grid-template-columns:repeat(5,1fr);gap:5px}
+  .stat{padding:8px 2px;border-radius:10px}
+  .stat b{font-size:20px}
+  .stat span{font-size:10.5px;white-space:nowrap}
+  /* toolbar */
+  .tool{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px;position:sticky;top:52px;z-index:10}
+  .tool .search{grid-column:1/-1;order:-1;min-width:0}
+  .tool .btn{justify-content:center;padding:8px 4px;font-size:12.5px;flex-direction:column;gap:0;line-height:1.3;white-space:normal;text-align:center}
+  .tool .scanbtn{display:none}
+  /* rows */
+  .row{grid-template-columns:30px 1fr;gap:8px 10px;padding:11px 12px;margin-bottom:8px}
+  .no{width:28px;height:28px;font-size:12px}
+  .who b{font-size:14.5px}
+  .sb{gap:5px}
+  .sb button{flex:1;min-width:0;padding:10px 0;font-size:13.5px}
+  .row input.f{padding:8px 11px}
+  /* FAB */
+  body.can-scan[data-tab=check] #fab{display:flex}
+  #fab{position:fixed;right:16px;bottom:calc(80px + env(safe-area-inset-bottom));z-index:39;width:62px;height:62px;border-radius:50%;border:0;background:linear-gradient(135deg,#4f46e5,#7c6bff);color:#fff;font-size:24px;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(79,70,229,.45);line-height:1}
+  #fab span{font-size:10.5px;font-weight:700;margin-top:2px}
+  #fab:active{transform:scale(.94)}
+  #toast{bottom:calc(150px + env(safe-area-inset-bottom))}
+  /* modal as bottom sheet */
+  .ov{align-items:end;padding:0}
+  .md,.md.wide{max-width:none;border-radius:18px 18px 0 0;max-height:92vh;animation:up .22s ease-out;padding-bottom:env(safe-area-inset-bottom)}
+  .md:before{content:'';display:block;width:40px;height:4px;border-radius:9px;background:#d6d8e4;margin:8px auto 0}
+  .mh{padding:10px 16px 12px}
+  .mb{padding:4px 16px 14px}
+  .mf{flex-wrap:wrap;padding:10px 16px 14px}
+  .mf .btn{flex:1 1 40%;justify-content:center;padding:12px 10px}
+  /* students */
+  .addgrid{grid-template-columns:1fr 1fr}
+  .addgrid>div:last-child{grid-column:1/-1}
+  .addgrid>div:last-child .btn{width:100%;justify-content:center;padding:11px}
+  .drop{padding:16px 12px;font-size:13.5px}
+  /* report */
+  .filt{gap:8px}
+  .filt>b{display:none}
+  .repsel{width:100%;min-width:0}
+  .seg{display:flex;width:100%}
+  .seg button{flex:1;padding:9px 2px;font-size:13px;white-space:nowrap}
+  .daterange{width:100%;display:grid!important;grid-template-columns:1fr auto 1fr;align-items:center}
+  .daterange input{width:100%!important;min-width:0}
+  .sp{display:none}
+  .repbtns{display:grid;grid-template-columns:repeat(3,1fr);width:100%;gap:6px}
+  .repbtns .btn{justify-content:center;padding:9px 4px;font-size:12.5px;white-space:normal;text-align:center}
+  /* tables */
+  table{font-size:13px} th,td{padding:7px 8px}
+  .tw{margin:0 -2px}
+  .mx{width:24px;height:24px;font-size:12px}
+  /* dashboard */
+  .kpis{gap:8px;margin-bottom:10px}
+  .kpi{padding:12px}
+  .kpi b{font-size:24px}
+  /* sheets / settings */
+  .info{grid-template-columns:105px 1fr}
+  .grid[style*="1fr 1fr"]{grid-template-columns:1fr!important}
+  pre.code{font-size:11px}
+  .acc summary{padding:12px 13px;font-size:13.5px}
+  .acc .ab{padding:10px 13px}
+  .lst li{flex-wrap:wrap}
+}
+@media (max-width:360px){
+  .logo{font-size:15px}
+  .stat span{font-size:9.5px}
+  nav button b{font-size:10px}
+}
+@keyframes up{from{transform:translateY(40px);opacity:.4}}
+@media print{nav,#fab{display:none!important}body{padding:0}}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
 .seg button{border:0;background:none;padding:8px 14px;font-weight:700;color:#555a72;border-right:1px solid var(--line)}
 .seg button:last-child{border-right:0}
@@ -195,17 +316,18 @@ ol.steps li{margin-bottom:8px}
       </div>
     </div>
     <nav id="nav">
-      <button data-t="check" class="on">📋 เช็คการบ้าน</button>
-      <button data-t="dash">📈 แดชบอร์ด</button>
-      <button data-t="students">👥 นักเรียน</button>
-      <button data-t="report">📊 รายงาน</button>
-      <button data-t="sheets">☁️ Google Sheets</button>
-      <button data-t="settings">⚙️ ตั้งค่า</button>
+      <button data-t="check" class="on"><i>📋</i><span>เช็คการบ้าน</span><b>เช็ค</b></button>
+      <button data-t="dash"><i>📈</i><span>แดชบอร์ด</span><b>ภาพรวม</b></button>
+      <button data-t="students"><i>👥</i><span>นักเรียน</span><b>นักเรียน</b></button>
+      <button data-t="report"><i>📊</i><span>รายงาน</span><b>รายงาน</b></button>
+      <button data-t="sheets"><i>☁️</i><span>Google Sheets</span><b>ชีต</b></button>
+      <button data-t="settings"><i>⚙️</i><span>ตั้งค่า</span><b>ตั้งค่า</b></button>
     </nav>
   </div>
 </header>
 <main id="app"></main>
 <div id="toast"></div>
+<button id="fab" onclick="openScanner()" aria-label="สแกน QR">📷<span>สแกน</span></button>
 <input type="file" id="fileXl" accept=".xlsx,.xls,.csv" hidden>
 <input type="file" id="fileJson" accept=".json" hidden>
 
@@ -290,11 +412,13 @@ $('#classSel').onchange=e=>{
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(!b)return;tab=b.dataset.t;document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));render()};
 function render(){
   renderHeader();
+  document.body.dataset.tab=tab;
   ({check:renderCheck,dash:renderDash,students:renderStudents,report:renderReport,sheets:renderSheets,settings:renderSettings})[tab]();
 }
 
 /* ================== CHECK TAB ================== */
 function renderCheck(){
+  document.body.classList.remove('can-scan');
   const c=cls(),s=subj(),a=asg(),app=$('#app');
   if(!c){app.innerHTML=`<div class="card empty"><div class="ico">🏫</div><p>ยังไม่มีห้องเรียน</p><button class="btn pri" onclick="classModal()">+ เพิ่มห้องเรียน</button></div>`;return}
   let h=`<div class="pills">${c.subjects.map(x=>`<button class="pill ${x.id===s?.id?'on':''}" onclick="pickSubject('${x.id}')">📚 ${esc(x.name)}</button>`).join('')}<button class="pill add" onclick="subjectModal()">+ เพิ่มรายวิชา</button></div>`;
@@ -321,15 +445,15 @@ function renderCheck(){
     <div class="bar" id="bar"></div>
   </div>
   <div class="card tool">
-    <button class="btn g" onclick="markAll()">✓ ส่งครบทุกคน</button>
-    <button class="btn" onclick="clearAll()">↺ ล้าง</button>
-    <div class="search"><input class="f" id="q" placeholder="ค้นหาชื่อ / เลขประจำตัว" value="${esc(query)}"></div>
-    <button class="btn pri" onclick="openScanner()">📷 สแกน QR</button>
-    <button class="btn line" onclick="shareLine()">💬 ส่ง LINE</button>
-    <button class="btn xl" onclick="exportAsg()">⬇ Excel</button>
+    <button class="btn g" onclick="markAll()">✓ <span>ส่งครบทุกคน</span></button>
+    <button class="btn" onclick="clearAll()">↺ <span>ล้าง</span></button>
+    <div class="search"><input class="f" id="q" type="search" placeholder="ค้นหาชื่อ / เลขประจำตัว" value="${esc(query)}"></div>
+    <button class="btn pri scanbtn" onclick="openScanner()">📷 <span>สแกน QR</span></button>
+    <button class="btn line" onclick="shareLine()">💬 <span>ส่ง LINE</span></button>
+    <button class="btn xl" onclick="exportAsg()">⬇ <span>Excel</span></button>
   </div>
   <div id="list"></div>`;
-  app.innerHTML=h;
+  app.innerHTML=h;document.body.classList.add('can-scan');
   $('#q').oninput=e=>{query=e.target.value;renderList()};
   renderStats();renderList();
 }
@@ -438,16 +562,21 @@ function shareLine(){
 }
 
 /* ---------- QR scanner ---------- */
-let scanner=null,lastScan={};
+let scanner=null,lastScan={},scanN=0,acT=null;
+function autoClose(){try{return localStorage.getItem('hw_autoclose')!=='0'}catch(e){return true}}
+function scheduleAutoClose(){if(!$('#autoClose')?.checked)return;clearTimeout(acT);const ls=$('#lastScan');if(ls)ls.insertAdjacentHTML('beforeend','<div class="sm mut" style="font-weight:500">กำลังปิด…</div>');acT=setTimeout(()=>{if($('#ov')&&$('#qr-reader')){closeModal();renderCheck()}},1100)}
 function openScanner(){
   const a=asg();
   modal('📷 สแกน QR ส่งการบ้าน',`
     <p class="sm mut" style="margin-top:8px">งาน: <b>${esc(a.title)}</b> · ส่องกล้องไปที่ QR ของนักเรียน ระบบจะเปลี่ยนสถานะเป็น <b style="color:var(--g)">"ส่ง"</b> ให้ทันที</p>
     <div id="qr-reader"></div>
     <div id="lastScan" style="text-align:center;font-weight:800;font-size:18px;margin-top:10px;min-height:28px"></div>
+    <label class="sw autoclose"><input type="checkbox" id="autoClose" ${autoClose()?'checked':''} onchange="try{localStorage.setItem('hw_autoclose',this.checked?'1':'0')}catch(e){}"> ปิดอัตโนมัติหลังสแกนสำเร็จ <span class="sm mut">(ปิดไว้ถ้าจะสแกนต่อกันหลายคน)</span></label>
+    <div class="scanbar"><span id="scanCount" class="sm mut">สแกนแล้ว 0 คน</span><button class="btn pri" onclick="closeModal();renderCheck()">✓ เสร็จสิ้น</button></div>
+    <div class="scanlog" id="scanlog"></div>
     <label class="l">หรือพิมพ์ / ยิงบาร์โค้ด เลขประจำตัว แล้วกด Enter</label>
-    <input class="f" id="manualCode" placeholder="เช่น 31001" inputmode="numeric">
-    <div class="scanlog" id="scanlog"></div>`,[{label:'เสร็จสิ้น',cls:'pri'}]);
+    <input class="f" id="manualCode" placeholder="เช่น 31001" inputmode="numeric">`,[]);
+  scanN=0;
   onModalClose=stopScanner;
   $('#manualCode').onkeydown=e=>{if(e.key==='Enter'){handleScan(e.target.value);e.target.value=''}};
   if(!window.Html5Qrcode){$('#qr-reader').innerHTML='<p style="color:#fff;padding:14px">โหลดตัวสแกนไม่สำเร็จ ใช้ช่องพิมพ์ด้านล่างแทนได้</p>';return}
@@ -455,7 +584,7 @@ function openScanner(){
   scanner.start({facingMode:'environment'},{fps:10,qrbox:{width:230,height:230}},txt=>handleScan(txt),()=>{})
     .catch(err=>{$('#qr-reader').innerHTML=`<p style="color:#fff;padding:14px">เปิดกล้องไม่ได้ (${esc(err)}).<br>ต้องอนุญาตการใช้กล้อง และเปิดผ่าน https (เช่น GitHub Pages)</p>`;scanner=null});
 }
-function stopScanner(){if(scanner){const s=scanner;scanner=null;s.stop().then(()=>s.clear()).catch(()=>{})}}
+function stopScanner(){clearTimeout(acT);if(scanner){const s=scanner;scanner=null;s.stop().then(()=>s.clear()).catch(()=>{})}}
 function handleScan(txt){
   txt=String(txt||'').trim();if(!txt)return;
   const now=Date.now();if(lastScan[txt]&&now-lastScan[txt]<2500)return;lastScan[txt]=now;
@@ -464,8 +593,8 @@ function handleScan(txt){
   if(!st){beep(false);log&&log.insertAdjacentHTML('afterbegin',`<div class="c-r">❌ ไม่พบรหัส "${esc(code)}" ในห้องนี้</div>`);return}
   const a=asg(),prev=a.records[st.id]?.s;
   const ls=$('#lastScan');
-  if(prev==='sent'){beep(true);ls&&(ls.innerHTML=`<span style="color:var(--y)">✓ ${esc(fullName(st))} ส่งแล้ว</span>`);log&&log.insertAdjacentHTML('afterbegin',`<div class="c-y">ℹ️ ${st.no}. ${esc(fullName(st))} – สถานะเป็น "ส่ง" อยู่แล้ว</div>`);return}
-  setSt(st.id,'sent',true);beep(true);
+  if(prev==='sent'){beep(true);ls&&(ls.innerHTML=`<span style="color:var(--y)">✓ ${esc(fullName(st))} ส่งแล้ว</span>`);log&&log.insertAdjacentHTML('afterbegin',`<div class="c-y">ℹ️ ${st.no}. ${esc(fullName(st))} – สถานะเป็น "ส่ง" อยู่แล้ว</div>`);scheduleAutoClose();return}
+  setSt(st.id,'sent',true);beep(true);scanN++;const sc=$('#scanCount');if(sc)sc.textContent=`สแกนแล้ว ${scanN} คน`;setTimeout(scheduleAutoClose,0);
   ls&&(ls.innerHTML=`<span style="color:var(--g)">✅ ${st.no}. ${esc(fullName(st))}</span>`);
   log&&log.insertAdjacentHTML('afterbegin',`<div class="c-g">✅ ${st.no}. ${esc(fullName(st))} – เปลี่ยนเป็น "ส่ง"${prev?` (เดิม: ${ST[prev].label})`:''} · ${thTime(now)}</div>`);
 }
@@ -478,7 +607,7 @@ function renderStudents(){
   $('#app').innerHTML=`
   <div class="card">
     <h3>➕ เพิ่มนักเรียน · ${esc(c.name)}</h3>
-    <div class="grid" style="grid-template-columns:80px 130px 110px 1fr 1fr auto;align-items:end" id="addGrid">
+    <div class="grid addgrid" id="addGrid">
       <div><label class="l">เลขที่</label><input class="f" id="aNo" type="number" value="${(list.reduce((m,s)=>Math.max(m,+s.no||0),0))+1}"></div>
       <div><label class="l">เลขประจำตัว</label><input class="f" id="aCode" placeholder="31001"></div>
       <div><label class="l">คำนำหน้า</label><select class="f" id="aPre">${['ด.ช.','ด.ญ.','นาย','นางสาว',''].map(p=>`<option>${p}</option>`).join('')}</select></div>
@@ -504,7 +633,6 @@ function renderStudents(){
       <td class="c"><button class="btn sm" onclick="editStudent('${s.id}')">✎ แก้ไข</button> <button class="btn sm danger" onclick="delStudent('${s.id}')">ลบ</button></td></tr>`).join('')}
     </tbody></table></div>`:'<div class="empty">ยังไม่มีรายชื่อ เพิ่มทีละคนหรือนำเข้าจาก Excel</div>'}
   </div>`;
-  if(innerWidth<860)$('#addGrid').style.gridTemplateColumns='1fr 1fr';
   const d=$('#drop');d.onclick=()=>$('#fileXl').click();
   d.ondragover=e=>{e.preventDefault();d.style.background='#e9e6ff'};d.ondragleave=()=>d.style.background='';
   d.ondrop=e=>{e.preventDefault();d.style.background='';if(e.dataTransfer.files[0])importExcel(e.dataTransfer.files[0])};
@@ -708,16 +836,16 @@ function renderReport(){
   <div class="card noprint">
     <div class="filt">
       <b>📊 รายงาน</b>
-      <select class="f" style="width:auto;min-width:180px" onchange="repSub=this.value;renderReport()"><option value="__all" ${D.all?'selected':''}>📚 ทุกวิชา</option>${c.subjects.map(x=>`<option value="${x.id}" ${x.id===repSub?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
+      <select class="f repsel" onchange="repSub=this.value;renderReport()"><option value="__all" ${D.all?'selected':''}>📚 ทุกวิชา</option>${c.subjects.map(x=>`<option value="${x.id}" ${x.id===repSub?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
       <div class="seg">${modes.map(([m,l])=>`<button class="${rep.mode===m?'on':''}" onclick="rep.mode='${m}';renderReport()">${l}</button>`).join('')}</div>
-      ${rep.mode==='custom'?`<span class="filt" style="gap:6px"><input type="date" class="f" value="${rep.from}" onchange="rep.from=this.value;renderReport()"> ถึง <input type="date" class="f" value="${rep.to}" onchange="rep.to=this.value;renderReport()"></span>`:''}
+      ${rep.mode==='custom'?`<span class="filt daterange" style="gap:6px"><input type="date" class="f" value="${rep.from}" onchange="rep.from=this.value;renderReport()"> ถึง <input type="date" class="f" value="${rep.to}" onchange="rep.to=this.value;renderReport()"></span>`:''}
     </div>
     <div class="filt" style="margin-top:10px">
       <span class="sm mut">กรองตามวันกำหนดส่งของงาน · ${rangeLabel()} · พบ ${A.length} งาน</span>
-      <span style="flex:1"></span>
-      <button class="btn xl" onclick="exportReport()" ${A.length?'':'disabled'}>⬇ Excel</button>
+      <span class="sp"></span>
+      <span class="repbtns"><button class="btn xl" onclick="exportReport()" ${A.length?'':'disabled'}>⬇ Excel</button>
       <button class="btn line" onclick="reportImage()" ${A.length?'':'disabled'}>🖼 รูปภาพส่ง LINE</button>
-      <button class="btn" onclick="print()">🖨 พิมพ์ / PDF</button>
+      <button class="btn" onclick="print()">🖨 พิมพ์ / PDF</button></span>
     </div>
   </div>
   <div class="card">
