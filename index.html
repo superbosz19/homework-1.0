@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HomeworkCheck – เช็คส่งการบ้าน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+:root{
+  --pri:#4f46e5; --pri2:#6d5dfc; --bg:#f3f4fb; --card:#fff; --line:#e6e8f2; --text:#1f2333; --mut:#6b7086;
+  --g:#16a34a; --gbg:#dcfce7; --y:#d97706; --ybg:#fef3c7; --b:#0284c7; --bbg:#e0f2fe; --r:#dc2626; --rbg:#fee2e2; --n:#6b7280; --nbg:#f1f2f6;
+  --rad:14px; --sh:0 1px 3px rgba(30,35,80,.06),0 4px 14px rgba(30,35,80,.04);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+/* header */
+header{background:linear-gradient(90deg,#4338ca,#5b52f0 55%,#6d63ff);color:#fff;position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(67,56,202,.25)}
+.hwrap{max-width:1100px;margin:auto;padding:10px 20px 0}
+.htop{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:21px}
+.logo i{width:30px;height:30px;border-radius:50%;background:#fff;color:var(--pri);display:grid;place-items:center;font-style:normal;font-size:17px}
+.logo small{font-weight:500;font-size:14px;opacity:.9;margin-left:4px}
+.hright{margin-left:auto;display:flex;gap:8px;align-items:center}
+.pillw{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600}
+.hsel{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.45);color:#fff;border-radius:10px;padding:7px 10px;font-weight:700;outline:none}
+.hsel option{color:#222}
+nav{display:flex;gap:4px;margin-top:10px;overflow-x:auto;scrollbar-width:none}
+nav button{background:none;border:0;color:#e9e8ff;padding:10px 16px;border-radius:12px 12px 0 0;font-weight:700;white-space:nowrap}
+nav button:hover{background:rgba(255,255,255,.1)}
+nav button.on{background:var(--bg);color:var(--pri)}
+main{max-width:1100px;margin:auto;padding:18px 20px 60px}
+/* generic */
+.card{background:var(--card);border-radius:var(--rad);box-shadow:var(--sh);padding:16px;margin-bottom:14px}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 14px;font-weight:700;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:.15s}
+.btn:hover{border-color:#c7c9de;background:#fafaff}
+.btn.pri{background:var(--pri);border-color:var(--pri);color:#fff}
+.btn.g{background:var(--g);border-color:var(--g);color:#fff}
+.btn.line{background:#06c755;border-color:#06c755;color:#fff}
+.btn.xl{background:#107c41;border-color:#107c41;color:#fff}
+.btn.danger{color:var(--r);border-color:#f5c2c2}
+.btn.sm{padding:6px 10px;font-size:13px;border-radius:8px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+input.f,select.f,textarea.f{border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:#fff;outline:none;width:100%}
+input.f:focus,select.f:focus,textarea.f:focus{border-color:#a5a0ff;box-shadow:0 0 0 3px rgba(99,91,255,.12)}
+label.l{display:block;font-size:13px;font-weight:600;color:var(--mut);margin:10px 0 4px}
+.mut{color:var(--mut)} .sm{font-size:13px}
+h2{margin:0;font-size:19px} h3{margin:0 0 10px;font-size:16px}
+.grid{display:grid;gap:10px}
+.empty{text-align:center;padding:40px 10px;color:var(--mut)}
+.empty .ico{font-size:42px}
+/* pills */
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pill{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;font-weight:700;color:#4b4f6b}
+.pill.on{background:var(--pri);border-color:var(--pri);color:#fff;box-shadow:0 3px 10px rgba(79,70,229,.3)}
+.pill.add{border-style:dashed;color:var(--pri)}
+/* check head */
+.chead{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.meta{font-size:13px;color:var(--mut);margin-top:4px}
+.badge{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:1px 7px;margin-left:6px;vertical-align:1px}
+.badge.r{background:var(--rbg);color:var(--r)} .badge.g{background:var(--gbg);color:var(--g)} .badge.y{background:var(--ybg);color:var(--y)}
+.apick{display:flex;gap:6px;align-items:flex-start}
+.apick select{min-width:220px;max-width:320px}
+.note{display:flex;align-items:center;gap:10px;background:#fffbea;border:1px solid #fbe7a1;border-radius:10px;padding:4px 14px;margin:14px 0}
+.note input{border:0;background:transparent;outline:none;flex:1;padding:8px 0}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.stat{border-radius:12px;padding:12px 6px;text-align:center;border:2px solid transparent;cursor:pointer;transition:.15s;user-select:none}
+.stat:hover{transform:translateY(-1px)}
+.stat.sel{border-color:currentColor}
+.stat b{display:block;font-size:24px;line-height:1.2}
+.stat span{font-size:13px;font-weight:700}
+.c-g{background:var(--gbg);color:var(--g)} .c-y{background:var(--ybg);color:var(--y)} .c-b{background:var(--bbg);color:var(--b)} .c-r{background:var(--rbg);color:var(--r)} .c-n{background:var(--nbg);color:var(--n)}
+.prog{display:flex;justify-content:space-between;font-size:13px;color:var(--mut);margin:12px 0 6px}
+.bar{height:8px;background:#eceef5;border-radius:99px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%;transition:width .3s}
+/* toolbar */
+.tool{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px}
+.search{flex:1;min-width:180px;position:relative}
+.search input{padding-left:36px}
+.search:before{content:'🔍';position:absolute;left:11px;top:9px;font-size:14px}
+/* rows */
+.row{background:#fff;border-radius:12px;box-shadow:var(--sh);display:grid;grid-template-columns:36px 1fr auto 300px;align-items:center;gap:12px;padding:12px 16px;margin-bottom:10px;border-left:4px solid #d9dbe6}
+.row.s-sent{border-left-color:var(--g)} .row.s-late{border-left-color:var(--y)} .row.s-excused{border-left-color:var(--b)} .row.s-missing{border-left-color:var(--r)}
+.no{width:32px;height:32px;border-radius:50%;background:#eef0ff;color:var(--pri);display:grid;place-items:center;font-weight:700;font-size:13px}
+.who b{display:block;font-size:15px}
+.who small{color:var(--mut);font-size:12px}
+.sb{display:flex;gap:6px}
+.sb button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;font-weight:700;color:#555a72;min-width:56px}
+.sb button:hover{background:#f7f7fb}
+.sb button.on.sent{background:var(--g);border-color:var(--g);color:#fff}
+.sb button.on.late{background:#f59e0b;border-color:#f59e0b;color:#fff}
+.sb button.on.excused{background:var(--b);border-color:var(--b);color:#fff}
+.sb button.on.missing{background:var(--r);border-color:var(--r);color:#fff}
+.row input.f{padding:9px 12px}
+/* tables */
+.tw{overflow:auto;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{background:#f7f7fc;font-weight:700;color:#4b4f6b;position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+td.c,th.c{text-align:center}
+.mx{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:7px;font-weight:800;font-size:13px}
+.mx.sent{background:var(--gbg);color:var(--g)} .mx.late{background:var(--ybg);color:var(--y)} .mx.excused{background:var(--bbg);color:var(--b)} .mx.missing{background:var(--rbg);color:var(--r)} .mx.none{background:var(--nbg);color:#aaa}
+/* dashboard */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.kpi{background:#fff;border-radius:var(--rad);box-shadow:var(--sh);padding:16px}
+.kpi span{color:var(--mut);font-size:13px;font-weight:600}
+.kpi b{display:block;font-size:28px;margin-top:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.hb{margin-bottom:12px}
+.hb .t{display:flex;justify-content:space-between;font-size:14px;margin-bottom:5px}
+.lst{list-style:none;padding:0;margin:0}
+.lst li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.lst li:last-child{border:0}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(20,22,45,.45);display:grid;place-items:center;z-index:50;padding:16px;animation:fd .15s}
+.md{background:#fff;border-radius:16px;width:100%;max-width:520px;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.md.wide{max-width:760px}
+.mh{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:2}
+.mh h3{margin:0}
+.mh button{border:0;background:none;font-size:22px;color:var(--mut)}
+.mb{padding:4px 18px 18px}
+.mf{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px;border-top:1px solid var(--line)}
+@keyframes fd{from{opacity:0}}
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:#22253a;color:#fff;padding:11px 18px;border-radius:12px;font-weight:600;opacity:0;transition:.25s;z-index:99;pointer-events:none;max-width:90vw}
+#toast.show{opacity:1;transform:translateX(-50%)}
+#qr-reader{width:100%;border-radius:12px;overflow:hidden;background:#111;min-height:60px}
+#qr-reader video{border-radius:12px}
+.scanlog{max-height:180px;overflow:auto;margin-top:10px}
+.scanlog div{padding:7px 10px;border-radius:8px;margin-bottom:5px;font-size:14px}
+.qrbox{display:grid;place-items:center;padding:10px}
+.qrbox svg{width:200px;height:200px}
+.chk{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px}
+.drop{border:2px dashed #c9c6ff;border-radius:12px;padding:22px;text-align:center;background:#f8f7ff;cursor:pointer}
+.drop:hover{background:#f0eeff}
+@media (max-width:860px){
+  .row{grid-template-columns:32px 1fr;}
+  .row .sb,.row input.f{grid-column:1/-1}
+  .sb button{flex:1}
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .two{grid-template-columns:1fr}
+  .logo small{display:none}
+}
+@media print{
+  header,.noprint,.tool,#toast{display:none!important}
+  body{background:#fff}
+  main{padding:0;max-width:none}
+  .card{box-shadow:none;padding:0}
+  .tw{border:0;overflow:visible}
+  th{position:static}
+}
+.printonly{display:none}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.seg button{border:0;background:none;padding:8px 14px;font-weight:700;color:#555a72;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--pri);color:#fff}
+.filt{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.filt input[type=date]{width:auto}
+.info{display:grid;grid-template-columns:140px 1fr;gap:6px 12px;font-size:14px;margin:6px 0 12px}
+.info span:nth-child(odd){color:var(--mut)}
+.warn{background:#fff7e6;border:1px solid #fcd9a0;border-radius:10px;padding:10px 14px;font-size:13px;line-height:1.7;margin:10px 0}
+.tip{background:#eef4ff;border:1px solid #c9dafc;border-radius:10px;padding:10px 14px;font-size:13px;line-height:1.7;margin:10px 0}
+pre.code{background:#1e1f2e;color:#d6d8f0;border-radius:10px;padding:14px;font-size:12px;max-height:260px;overflow:auto;margin:8px 0;font-family:ui-monospace,Consolas,monospace;line-height:1.5}
+ol.steps{padding-left:22px;line-height:1.9;font-size:14px}
+ol.steps li{margin-bottom:8px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.acc details{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;background:#fff;overflow:hidden}
+.acc summary{padding:13px 16px;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px}
+.acc summary::-webkit-details-marker{display:none}
+.acc summary:after{content:'▾';color:var(--mut);transition:.2s}
+.acc details[open] summary:after{transform:rotate(180deg)}
+.acc details[open] summary{background:#f7f7fc;border-bottom:1px solid var(--line)}
+.acc .ab{padding:12px 16px;font-size:14px;line-height:1.8}
+.acc .ab ol,.acc .ab ul{padding-left:22px;margin:6px 0}
+.acc .ab table{font-size:13px}
+.sw{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;margin:6px 0}
+@media print{.printonly{display:block}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <div class="htop">
+      <div class="logo"><i>✓</i>HomeworkCheck <small>เช็คส่งการบ้าน</small></div>
+      <div class="hright">
+        <span class="pillw" id="saveInd">💾 บันทึกแล้ว</span>
+        <select class="hsel" id="classSel"></select>
+      </div>
+    </div>
+    <nav id="nav">
+      <button data-t="check" class="on">📋 เช็คการบ้าน</button>
+      <button data-t="dash">📈 แดชบอร์ด</button>
+      <button data-t="students">👥 นักเรียน</button>
+      <button data-t="report">📊 รายงาน</button>
+      <button data-t="sheets">☁️ Google Sheets</button>
+      <button data-t="settings">⚙️ ตั้งค่า</button>
+    </nav>
+  </div>
+</header>
+<main id="app"></main>
+<div id="toast"></div>
+<input type="file" id="fileXl" accept=".xlsx,.xls,.csv" hidden>
+<input type="file" id="fileJson" accept=".json" hidden>
+
+<script>
+/* ================== DATA ================== */
+const KEY='homeworkcheck_v1';
+const ST={
+  sent:{label:'ส่งแล้ว',btn:'ส่ง',c:'g',sym:'✓',emo:'✅'},
+  late:{label:'ส่งช้า',btn:'ส่งช้า',c:'y',sym:'ช',emo:'⏰'},
+  excused:{label:'ยกเว้น',btn:'ยกเว้น',c:'b',sym:'ย',emo:'🟦'},
+  missing:{label:'ไม่ส่ง',btn:'ไม่ส่ง',c:'r',sym:'✗',emo:'❌'}
+};
+const $=s=>document.querySelector(s);
+const uid=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function todayISO(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)}
+function thDate(iso,long){if(!iso)return '-';const d=new Date(iso+'T00:00:00');return d.toLocaleDateString('th-TH',long?{weekday:'long',day:'numeric',month:'long',year:'numeric'}:{day:'numeric',month:'short',year:'2-digit'})}
+function thTime(ts){return new Date(ts).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}
+
+function seed(){
+  const names=[['ด.ช.','ภาคิน','วงศ์ดี'],['ด.ช.','พีรพล','มั่นคง'],['ด.ช.','วชิรวิทย์','พรหมมา'],['ด.ญ.','ณัฐธิดา','มีสุข'],['ด.ญ.','กมลชนก','ศรีสวัสดิ์'],['ด.ช.','ธนกฤต','ใจงาม'],['ด.ญ.','พิมพ์ชนก','บุญมา'],['ด.ญ.','ปุณยวีร์','แก้วใส']];
+  const students=names.map((n,i)=>({id:uid(),no:i+1,code:String(31001+i),prefix:n[0],first:n[1],last:n[2]}));
+  const a={id:uid(),title:'แบบฝึกหัดบทที่ 1',due:todayISO(),note:'',created:Date.now(),records:{}};
+  const sub={id:uid(),name:'คณิตศาสตร์',code:'ค21101',teacher:'',assignments:[a]};
+  const c={id:uid(),name:'ม.1/2',teacher:'',students,subjects:[sub]};
+  return {settings:{school:''},classes:[c],cur:{classId:c.id,subjectId:sub.id,assignmentId:a.id}};
+}
+function load(){try{const s=localStorage.getItem(KEY);return s?JSON.parse(s):null}catch(e){return null}}
+let db=load()||seed();
+let saveT;
+function save(noSync){
+  try{localStorage.setItem(KEY,JSON.stringify(db))}
+  catch(e){$('#saveInd').textContent='⚠️ บันทึกไม่ได้';return}
+  if(!noSync&&sync.connected){sync.pending=(sync.pending||0)+1;saveSync();scheduleSync()}
+  updateInd();
+}
+function saveSoon(){$('#saveInd').textContent='⏳ กำลังบันทึก';clearTimeout(saveT);saveT=setTimeout(save,400)}
+
+const cls=()=>db.classes.find(c=>c.id===db.cur.classId)||db.classes[0];
+const subj=()=>{const c=cls();return c?(c.subjects.find(s=>s.id===db.cur.subjectId)||c.subjects[0]||null):null};
+const asg=()=>{const s=subj();return s?(s.assignments.find(a=>a.id===db.cur.assignmentId)||s.assignments[s.assignments.length-1]||null):null};
+const students=()=>(cls()?.students||[]).slice().sort((a,b)=>(a.no||0)-(b.no||0)||String(a.code).localeCompare(b.code));
+const fullName=s=>`${s.prefix||''}${s.first||''} ${s.last||''}`.trim();
+
+function counts(a,list){
+  const r={sent:0,late:0,excused:0,missing:0,none:0};
+  (list||students()).forEach(s=>{const x=a.records[s.id];r[x&&x.s?x.s:'none']++});
+  return r;
+}
+function rate(c){const d=c.sent+c.late+c.missing+c.none;return d?Math.round((c.sent+c.late)/d*100):0}
+const isOver=a=>a&&a.due&&todayISO()>a.due;
+
+/* ================== UI HELPERS ================== */
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200)}
+function modal(title,body,buttons=[],wide){
+  closeModal();
+  const ov=document.createElement('div');ov.className='ov';ov.id='ov';
+  ov.innerHTML=`<div class="md ${wide?'wide':''}"><div class="mh"><h3>${title}</h3><button data-x>×</button></div><div class="mb">${body}</div>${buttons.length?'<div class="mf"></div>':''}</div>`;
+  const mf=ov.querySelector('.mf');
+  buttons.forEach(b=>{const e=document.createElement('button');e.className='btn '+(b.cls||'');e.innerHTML=b.label;e.onclick=()=>b.onClick?b.onClick(ov):closeModal();mf.appendChild(e)});
+  ov.querySelector('[data-x]').onclick=closeModal;
+  ov.addEventListener('mousedown',e=>{if(e.target===ov)closeModal()});
+  document.body.appendChild(ov);
+  const f=ov.querySelector('input,select,textarea');if(f)setTimeout(()=>f.focus(),50);
+  return ov;
+}
+let onModalClose=null;
+function closeModal(){const o=$('#ov');if(o){o.remove();if(onModalClose){const f=onModalClose;onModalClose=null;f()}}}
+function confirmBox(msg,fn,label='ยืนยัน'){modal('ยืนยัน',`<p>${msg}</p>`,[{label:'ยกเลิก'},{label,cls:'danger',onClick:()=>{closeModal();fn()}}])}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+/* ================== HEADER / NAV ================== */
+let tab='check',filter=null,query='';
+function renderHeader(){
+  const sel=$('#classSel');
+  sel.innerHTML=db.classes.map(c=>`<option value="${c.id}" ${c.id===cls()?.id?'selected':''}>${esc(c.name)} (${c.students.length})</option>`).join('')+'<option value="__add">+ เพิ่มห้องเรียน</option>';
+}
+$('#classSel').onchange=e=>{
+  if(e.target.value==='__add'){renderHeader();classModal();return}
+  db.cur.classId=e.target.value;const s=cls().subjects[0];db.cur.subjectId=s?.id;db.cur.assignmentId=null;filter=null;save();render();
+};
+$('#nav').onclick=e=>{const b=e.target.closest('button');if(!b)return;tab=b.dataset.t;document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));render()};
+function render(){
+  renderHeader();
+  ({check:renderCheck,dash:renderDash,students:renderStudents,report:renderReport,sheets:renderSheets,settings:renderSettings})[tab]();
+}
+
+/* ================== CHECK TAB ================== */
+function renderCheck(){
+  const c=cls(),s=subj(),a=asg(),app=$('#app');
+  if(!c){app.innerHTML=`<div class="card empty"><div class="ico">🏫</div><p>ยังไม่มีห้องเรียน</p><button class="btn pri" onclick="classModal()">+ เพิ่มห้องเรียน</button></div>`;return}
+  let h=`<div class="pills">${c.subjects.map(x=>`<button class="pill ${x.id===s?.id?'on':''}" onclick="pickSubject('${x.id}')">📚 ${esc(x.name)}</button>`).join('')}<button class="pill add" onclick="subjectModal()">+ เพิ่มรายวิชา</button></div>`;
+  if(!s){app.innerHTML=h+`<div class="card empty"><div class="ico">📚</div><p>ยังไม่มีรายวิชาในห้อง ${esc(c.name)}</p><button class="btn pri" onclick="subjectModal()">+ เพิ่มรายวิชา</button></div>`;return}
+  if(!a){app.innerHTML=h+`<div class="card empty"><div class="ico">📝</div><p>วิชา ${esc(s.name)} ยังไม่มีงาน/การบ้าน</p><button class="btn pri" onclick="asgModal()">+ สร้างงานใหม่</button></div>`;return}
+  if(!c.students.length){app.innerHTML=h+`<div class="card empty"><div class="ico">👥</div><p>ห้องนี้ยังไม่มีรายชื่อนักเรียน</p><button class="btn pri" onclick="tab='students';document.querySelector('[data-t=students]').click()">ไปเพิ่ม / นำเข้ารายชื่อ</button></div>`;return}
+  const opts=s.assignments.slice().reverse().map(x=>`<option value="${x.id}" ${x.id===a.id?'selected':''}>${esc(x.title)} · ${thDate(x.due)}</option>`).join('');
+  h+=`<div class="card">
+    <div class="chead">
+      <div>
+        <h2>📝 ${esc(a.title)}</h2>
+        <div class="meta">📚 ${esc(s.name)}${s.code?' ('+esc(s.code)+')':''} · ${esc(c.name)}${s.teacher?' · 👩‍🏫 ครูผู้สอน: '+esc(s.teacher):''}</div>
+        <div class="meta">📅 กำหนดส่ง: ${thDate(a.due,true)} ${isOver(a)?'<span class="badge r">เลยกำหนด</span>':a.due===todayISO()?'<span class="badge y">ส่งวันนี้</span>':'<span class="badge g">ยังไม่ถึงกำหนด</span>'}</div>
+      </div>
+      <div class="apick">
+        <select class="f" onchange="db.cur.assignmentId=this.value;filter=null;save();renderCheck()">${opts}</select>
+        <button class="btn" title="แก้ไขงาน" onclick="asgModal('${a.id}')">✎</button>
+        <button class="btn pri" onclick="asgModal()">+ งานใหม่</button>
+      </div>
+    </div>
+    <div class="note">📝<input value="${esc(a.note)}" placeholder="รายละเอียดงาน (ไม่บังคับ) เช่น แบบฝึกหัดหน้า 25 ข้อ 1-10, ส่งในสมุด" oninput="asg().note=this.value;saveSoon()"></div>
+    <div class="stats" id="stats"></div>
+    <div class="prog"><span id="progT"></span><span id="progR"></span></div>
+    <div class="bar" id="bar"></div>
+  </div>
+  <div class="card tool">
+    <button class="btn g" onclick="markAll()">✓ ส่งครบทุกคน</button>
+    <button class="btn" onclick="clearAll()">↺ ล้าง</button>
+    <div class="search"><input class="f" id="q" placeholder="ค้นหาชื่อ / เลขประจำตัว" value="${esc(query)}"></div>
+    <button class="btn pri" onclick="openScanner()">📷 สแกน QR</button>
+    <button class="btn line" onclick="shareLine()">💬 ส่ง LINE</button>
+    <button class="btn xl" onclick="exportAsg()">⬇ Excel</button>
+  </div>
+  <div id="list"></div>`;
+  app.innerHTML=h;
+  $('#q').oninput=e=>{query=e.target.value;renderList()};
+  renderStats();renderList();
+}
+function pickSubject(id){db.cur.subjectId=id;db.cur.assignmentId=null;filter=null;save();renderCheck()}
+function renderStats(){
+  const a=asg();if(!a||!$('#stats'))return;
+  const k=counts(a),N=students().length,checked=N-k.none;
+  const items=[['sent','c-g','ส่งแล้ว'],['late','c-y','ส่งช้า'],['excused','c-b','ยกเว้น'],['missing','c-r','ไม่ส่ง'],['none','c-n','ยังไม่ตรวจ']];
+  $('#stats').innerHTML=items.map(([key,c,l])=>`<div class="stat ${c} ${filter===key?'sel':''}" onclick="filter=filter==='${key}'?null:'${key}';renderStats();renderList()" title="คลิกเพื่อกรอง"><b>${k[key]}</b><span>${l}</span></div>`).join('');
+  $('#progT').textContent=`ตรวจแล้ว ${checked} / ${N} คน`+(filter?` · กำลังกรอง: ${items.find(i=>i[0]===filter)[2]}`:'');
+  $('#progR').innerHTML=checked===N?'<b style="color:var(--g)">✅ ตรวจครบแล้ว</b>':`อัตราการส่ง ${rate(k)}%`;
+  $('#bar').innerHTML=N?['sent','late','excused','missing'].map(x=>`<i style="width:${k[x]/N*100}%;background:var(--${ST[x].c})"></i>`).join(''):'';
+}
+function renderList(){
+  const a=asg(),q=query.trim().toLowerCase();
+  let list=students().filter(s=>!q||fullName(s).toLowerCase().includes(q)||String(s.code).includes(q)||String(s.no)===q);
+  if(filter)list=list.filter(s=>(a.records[s.id]?.s||'none')===filter);
+  $('#list').innerHTML=list.length?list.map(rowHTML).join(''):'<div class="card empty">ไม่พบรายชื่อ</div>';
+}
+function rowHTML(s){
+  const r=asg().records[s.id]||{};
+  return `<div class="row ${r.s?'s-'+r.s:''}" id="r-${s.id}">
+    <div class="no">${s.no||'-'}</div>
+    <div class="who"><b>${esc(fullName(s))}</b><small>เลขประจำตัว ${esc(s.code)}${r.t&&(r.s==='sent'||r.s==='late')?' · ส่งเมื่อ '+thTime(r.t):''}</small></div>
+    <div class="sb">${Object.keys(ST).map(k=>`<button class="${k} ${r.s===k?'on':''}" onclick="setSt('${s.id}','${k}')">${ST[k].btn}</button>`).join('')}</div>
+    <input class="f" placeholder="เหตุผล / หมายเหตุ" value="${esc(r.r)}" oninput="setReason('${s.id}',this.value)">
+  </div>`;
+}
+function setSt(sid,k,silent){
+  const a=asg();const r=a.records[sid]||(a.records[sid]={});
+  if(r.s===k&&!silent){delete r.s;delete r.t}else{r.s=k;r.t=Date.now()}
+  if(!r.s&&!r.r)delete a.records[sid];
+  save();
+  const el=$('#r-'+sid);
+  if(el){const s=cls().students.find(x=>x.id===sid);const tmp=document.createElement('div');tmp.innerHTML=rowHTML(s);el.replaceWith(tmp.firstElementChild)}
+  renderStats();
+}
+function setReason(sid,v){const a=asg();const r=a.records[sid]||(a.records[sid]={});r.r=v;saveSoon()}
+function markAll(){const a=asg();let n=0;students().forEach(s=>{const r=a.records[s.id]||(a.records[s.id]={});if(!r.s){r.s='sent';r.t=Date.now();n++}});save();renderCheck();toast(`บันทึก "ส่งแล้ว" ให้ ${n} คนที่ยังไม่ตรวจ`)}
+function clearAll(){confirmBox('ล้างสถานะและเหตุผลของงานนี้ทั้งหมด?',()=>{asg().records={};save();renderCheck();toast('ล้างข้อมูลแล้ว')},'ล้าง')}
+
+/* ---------- subject / assignment / class modals ---------- */
+function subjectModal(id){
+  const s=id?cls().subjects.find(x=>x.id===id):null;
+  modal(s?'แก้ไขรายวิชา':'เพิ่มรายวิชา',`
+    <label class="l">ชื่อวิชา *</label><input class="f" id="m1" value="${esc(s?.name)}" placeholder="เช่น ภาษาไทย, วิทยาศาสตร์">
+    <label class="l">รหัสวิชา</label><input class="f" id="m2" value="${esc(s?.code)}" placeholder="เช่น ท21101">
+    <label class="l">ครูผู้สอน</label><input class="f" id="m3" value="${esc(s?.teacher||db.settings.teacher||'')}" placeholder="ชื่อครูผู้สอน">`,
+  [{label:'ยกเลิก'},{label:s?'บันทึก':'+ เพิ่มรายวิชา',cls:'pri',onClick:()=>{
+    const name=$('#m1').value.trim();if(!name)return toast('กรุณากรอกชื่อวิชา');
+    if(s){Object.assign(s,{name,code:$('#m2').value.trim(),teacher:$('#m3').value.trim()})}
+    else{const n={id:uid(),name,code:$('#m2').value.trim(),teacher:$('#m3').value.trim(),assignments:[]};cls().subjects.push(n);db.cur.subjectId=n.id;db.cur.assignmentId=null}
+    save();closeModal();render();toast('บันทึกรายวิชาแล้ว');
+    if(!s)setTimeout(()=>asgModal(),200);
+  }}]);
+}
+function asgModal(id){
+  const a=id?subj().assignments.find(x=>x.id===id):null;
+  modal(a?'แก้ไขงาน':`สร้างงานใหม่ · ${esc(subj().name)}`,`
+    <label class="l">ชื่องาน / การบ้าน *</label><input class="f" id="m1" value="${esc(a?.title)}" placeholder="เช่น แบบฝึกหัดบทที่ 2, รายงานกลุ่ม">
+    <label class="l">กำหนดส่ง</label><input class="f" type="date" id="m2" value="${a?.due||todayISO()}">
+    <label class="l">รายละเอียด</label><textarea class="f" id="m3" rows="2" placeholder="ไม่บังคับ">${esc(a?.note)}</textarea>
+    ${a?`<div style="margin-top:14px"><button class="btn sm danger" onclick="delAsg('${a.id}')">🗑 ลบงานนี้</button></div>`:''}`,
+  [{label:'ยกเลิก'},{label:a?'บันทึก':'+ สร้างงาน',cls:'pri',onClick:()=>{
+    const title=$('#m1').value.trim();if(!title)return toast('กรุณากรอกชื่องาน');
+    if(a)Object.assign(a,{title,due:$('#m2').value,note:$('#m3').value});
+    else{const n={id:uid(),title,due:$('#m2').value,note:$('#m3').value,created:Date.now(),records:{}};subj().assignments.push(n);db.cur.assignmentId=n.id}
+    filter=null;save();closeModal();render();toast('บันทึกงานแล้ว');
+  }}]);
+}
+function delAsg(id){confirmBox('ลบงานนี้และข้อมูลการส่งทั้งหมด?',()=>{const s=subj();s.assignments=s.assignments.filter(x=>x.id!==id);db.cur.assignmentId=null;save();render();toast('ลบงานแล้ว')},'ลบ')}
+function classModal(id){
+  const c=id?db.classes.find(x=>x.id===id):null;
+  modal(c?'แก้ไขห้องเรียน':'เพิ่มห้องเรียน',`
+    <label class="l">ชื่อห้อง *</label><input class="f" id="m1" value="${esc(c?.name)}" placeholder="เช่น ม.1/2">
+    <label class="l">ครูประจำชั้น</label><input class="f" id="m2" value="${esc(c?.teacher)}">`,
+  [{label:'ยกเลิก'},{label:'บันทึก',cls:'pri',onClick:()=>{
+    const name=$('#m1').value.trim();if(!name)return toast('กรุณากรอกชื่อห้อง');
+    if(c)Object.assign(c,{name,teacher:$('#m2').value.trim()});
+    else{const n={id:uid(),name,teacher:$('#m2').value.trim(),students:[],subjects:[]};db.classes.push(n);db.cur.classId=n.id;db.cur.subjectId=null;db.cur.assignmentId=null}
+    save();closeModal();render();toast('บันทึกห้องเรียนแล้ว');
+  }}]);
+}
+
+/* ---------- export / line ---------- */
+function xlsxOK(){if(window.XLSX)return true;toast('โหลดไลบรารี Excel ไม่สำเร็จ – ตรวจสอบอินเทอร์เน็ต');return false}
+function safeName(s){return String(s).replace(/[\\/:*?"<>|]/g,'-')}
+function exportAsg(){
+  if(!xlsxOK())return;const a=asg(),s=subj(),c=cls();
+  const rows=[[`รายงานการส่งงาน: ${a.title}`],[`วิชา ${s.name} ${s.code||''} ห้อง ${c.name}  กำหนดส่ง ${thDate(a.due,true)}`],[],['เลขที่','เลขประจำตัว','ชื่อ-สกุล','สถานะ','เวลาบันทึก','เหตุผล/หมายเหตุ']];
+  students().forEach(st=>{const r=a.records[st.id]||{};rows.push([st.no,st.code,fullName(st),r.s?ST[r.s].label:'ยังไม่ตรวจ',r.t?new Date(r.t).toLocaleString('th-TH'):'',r.r||''])});
+  const k=counts(a);rows.push([],['สรุป'],['ส่งแล้ว',k.sent],['ส่งช้า',k.late],['ยกเว้น',k.excused],['ไม่ส่ง',k.missing],['ยังไม่ตรวจ',k.none],['อัตราการส่ง',rate(k)+'%']);
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:7},{wch:13},{wch:28},{wch:12},{wch:20},{wch:30}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'การส่งงาน');
+  XLSX.writeFile(wb,safeName(`ส่งงาน_${c.name}_${s.name}_${a.title}.xlsx`));
+}
+function shareLine(){
+  const a=asg(),s=subj(),c=cls(),k=counts(a);
+  const miss=students().filter(st=>{const x=a.records[st.id]?.s;return x==='missing'||!x});
+  let t=`📚 สรุปการส่งงาน วิชา${s.name} ${c.name}\n📝 ${a.title}\n📅 กำหนดส่ง ${thDate(a.due,true)}\n\n✅ ส่งแล้ว ${k.sent}  ⏰ ส่งช้า ${k.late}\n🟦 ยกเว้น ${k.excused}  ❌ ไม่ส่ง ${k.missing}  ⬜ ยังไม่ตรวจ ${k.none}\n📈 อัตราการส่ง ${rate(k)}%`;
+  if(miss.length)t+=`\n\nรายชื่อที่ยังไม่ส่ง (${miss.length} คน)\n`+miss.map(st=>`${st.no}. ${fullName(st)}${a.records[st.id]?.r?' – '+a.records[st.id].r:''}`).join('\n');
+  else t+='\n\n🎉 ส่งครบทุกคน';
+  modal('💬 ส่งสรุปทาง LINE',`<textarea class="f" id="lt" rows="12">${esc(t)}</textarea>`,[
+    {label:'📋 คัดลอก',onClick:()=>{const v=$('#lt').value;(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast('คัดลอกแล้ว')).catch(()=>{$('#lt').select();document.execCommand('copy');toast('คัดลอกแล้ว')})}},
+    {label:'เปิด LINE',cls:'line',onClick:()=>window.open('https://line.me/R/share?text='+encodeURIComponent($('#lt').value),'_blank')}]);
+}
+
+/* ---------- QR scanner ---------- */
+let scanner=null,lastScan={};
+function openScanner(){
+  const a=asg();
+  modal('📷 สแกน QR ส่งการบ้าน',`
+    <p class="sm mut" style="margin-top:8px">งาน: <b>${esc(a.title)}</b> · ส่องกล้องไปที่ QR ของนักเรียน ระบบจะเปลี่ยนสถานะเป็น <b style="color:var(--g)">"ส่ง"</b> ให้ทันที</p>
+    <div id="qr-reader"></div>
+    <div id="lastScan" style="text-align:center;font-weight:800;font-size:18px;margin-top:10px;min-height:28px"></div>
+    <label class="l">หรือพิมพ์ / ยิงบาร์โค้ด เลขประจำตัว แล้วกด Enter</label>
+    <input class="f" id="manualCode" placeholder="เช่น 31001" inputmode="numeric">
+    <div class="scanlog" id="scanlog"></div>`,[{label:'เสร็จสิ้น',cls:'pri'}]);
+  onModalClose=stopScanner;
+  $('#manualCode').onkeydown=e=>{if(e.key==='Enter'){handleScan(e.target.value);e.target.value=''}};
+  if(!window.Html5Qrcode){$('#qr-reader').innerHTML='<p style="color:#fff;padding:14px">โหลดตัวสแกนไม่สำเร็จ ใช้ช่องพิมพ์ด้านล่างแทนได้</p>';return}
+  scanner=new Html5Qrcode('qr-reader');
+  scanner.start({facingMode:'environment'},{fps:10,qrbox:{width:230,height:230}},txt=>handleScan(txt),()=>{})
+    .catch(err=>{$('#qr-reader').innerHTML=`<p style="color:#fff;padding:14px">เปิดกล้องไม่ได้ (${esc(err)}).<br>ต้องอนุญาตการใช้กล้อง และเปิดผ่าน https (เช่น GitHub Pages)</p>`;scanner=null});
+}
+function stopScanner(){if(scanner){const s=scanner;scanner=null;s.stop().then(()=>s.clear()).catch(()=>{})}}
+function handleScan(txt){
+  txt=String(txt||'').trim();if(!txt)return;
+  const now=Date.now();if(lastScan[txt]&&now-lastScan[txt]<2500)return;lastScan[txt]=now;
+  const st=findScanned(txt),code=st?st.code:txt.split(/\r?\n/)[0].slice(0,30);
+  const log=$('#scanlog');
+  if(!st){beep(false);log&&log.insertAdjacentHTML('afterbegin',`<div class="c-r">❌ ไม่พบรหัส "${esc(code)}" ในห้องนี้</div>`);return}
+  const a=asg(),prev=a.records[st.id]?.s;
+  const ls=$('#lastScan');
+  if(prev==='sent'){beep(true);ls&&(ls.innerHTML=`<span style="color:var(--y)">✓ ${esc(fullName(st))} ส่งแล้ว</span>`);log&&log.insertAdjacentHTML('afterbegin',`<div class="c-y">ℹ️ ${st.no}. ${esc(fullName(st))} – สถานะเป็น "ส่ง" อยู่แล้ว</div>`);return}
+  setSt(st.id,'sent',true);beep(true);
+  ls&&(ls.innerHTML=`<span style="color:var(--g)">✅ ${st.no}. ${esc(fullName(st))}</span>`);
+  log&&log.insertAdjacentHTML('afterbegin',`<div class="c-g">✅ ${st.no}. ${esc(fullName(st))} – เปลี่ยนเป็น "ส่ง"${prev?` (เดิม: ${ST[prev].label})`:''} · ${thTime(now)}</div>`);
+}
+function beep(ok){try{const A=new(window.AudioContext||window.webkitAudioContext)();const o=A.createOscillator(),g=A.createGain();o.frequency.value=ok?1046:220;g.gain.value=.12;o.connect(g);g.connect(A.destination);o.start();setTimeout(()=>{o.stop();A.close()},ok?130:320)}catch(e){}if(navigator.vibrate)navigator.vibrate(ok?60:[80,60,80])}
+
+/* ================== STUDENTS TAB ================== */
+function renderStudents(){
+  const c=cls();if(!c){renderCheck();return}
+  const list=students();
+  $('#app').innerHTML=`
+  <div class="card">
+    <h3>➕ เพิ่มนักเรียน · ${esc(c.name)}</h3>
+    <div class="grid" style="grid-template-columns:80px 130px 110px 1fr 1fr auto;align-items:end" id="addGrid">
+      <div><label class="l">เลขที่</label><input class="f" id="aNo" type="number" value="${(list.reduce((m,s)=>Math.max(m,+s.no||0),0))+1}"></div>
+      <div><label class="l">เลขประจำตัว</label><input class="f" id="aCode" placeholder="31001"></div>
+      <div><label class="l">คำนำหน้า</label><select class="f" id="aPre">${['ด.ช.','ด.ญ.','นาย','นางสาว',''].map(p=>`<option>${p}</option>`).join('')}</select></div>
+      <div><label class="l">ชื่อ *</label><input class="f" id="aFirst"></div>
+      <div><label class="l">นามสกุล</label><input class="f" id="aLast"></div>
+      <div><button class="btn pri" onclick="addStudent()">+ เพิ่ม</button></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>📥 นำเข้ารายชื่อจาก Excel</h3>
+    <div class="drop" id="drop">📄 <b>คลิกเพื่อเลือกไฟล์</b> หรือลากไฟล์ .xlsx / .xls / .csv มาวางที่นี่<br><span class="sm mut">คอลัมน์ที่รองรับ: เลขที่, เลขประจำตัว, คำนำหน้า, ชื่อ, นามสกุล (หรือ ชื่อ-สกุล รวมช่องเดียว)</span></div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn sm" onclick="downloadTemplate()">⬇ ดาวน์โหลดไฟล์ตัวอย่าง</button>
+      <button class="btn sm" onclick="printQR(null)"${list.length?'':'disabled'}>🖨 พิมพ์บัตร QR ทั้งห้อง</button>
+      <button class="btn sm danger" onclick="delAllStudents()" ${list.length?'':'disabled'}>🗑 ลบรายชื่อทั้งหมด</button>
+    </div>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="margin:0">👥 รายชื่อนักเรียน (${list.length} คน)</h3></div>
+    ${list.length?`<div class="tw"><table><thead><tr><th class="c">เลขที่</th><th>เลขประจำตัว</th><th>ชื่อ-สกุล</th><th class="c">QR</th><th class="c">จัดการ</th></tr></thead><tbody>
+    ${list.map(s=>`<tr><td class="c">${s.no||'-'}</td><td>${esc(s.code)}</td><td>${esc(fullName(s))}</td>
+      <td class="c"><button class="btn sm" onclick="showQR('${s.id}')">▦ QR</button></td>
+      <td class="c"><button class="btn sm" onclick="editStudent('${s.id}')">✎ แก้ไข</button> <button class="btn sm danger" onclick="delStudent('${s.id}')">ลบ</button></td></tr>`).join('')}
+    </tbody></table></div>`:'<div class="empty">ยังไม่มีรายชื่อ เพิ่มทีละคนหรือนำเข้าจาก Excel</div>'}
+  </div>`;
+  if(innerWidth<860)$('#addGrid').style.gridTemplateColumns='1fr 1fr';
+  const d=$('#drop');d.onclick=()=>$('#fileXl').click();
+  d.ondragover=e=>{e.preventDefault();d.style.background='#e9e6ff'};d.ondragleave=()=>d.style.background='';
+  d.ondrop=e=>{e.preventDefault();d.style.background='';if(e.dataTransfer.files[0])importExcel(e.dataTransfer.files[0])};
+  $('#aLast').onkeydown=$('#aFirst').onkeydown=e=>{if(e.key==='Enter')addStudent()};
+}
+function addStudent(){
+  const first=$('#aFirst').value.trim();if(!first)return toast('กรุณากรอกชื่อ');
+  const code=$('#aCode').value.trim();
+  if(code&&cls().students.some(s=>String(s.code)===code))return toast('เลขประจำตัวนี้มีอยู่แล้ว');
+  cls().students.push({id:uid(),no:+$('#aNo').value||0,code:code||String(Date.now()).slice(-6),prefix:$('#aPre').value,first,last:$('#aLast').value.trim()});
+  save();renderStudents();renderHeader();toast('เพิ่มนักเรียนแล้ว');setTimeout(()=>$('#aFirst')?.focus(),30);
+}
+function editStudent(id){
+  const s=cls().students.find(x=>x.id===id);
+  modal('แก้ไขข้อมูลนักเรียน',`
+    <div class="grid" style="grid-template-columns:1fr 1fr">
+      <div><label class="l">เลขที่</label><input class="f" id="e1" type="number" value="${s.no||''}"></div>
+      <div><label class="l">เลขประจำตัว</label><input class="f" id="e2" value="${esc(s.code)}"></div>
+    </div>
+    <label class="l">คำนำหน้า</label><input class="f" id="e3" value="${esc(s.prefix)}" list="pres"><datalist id="pres"><option>ด.ช.</option><option>ด.ญ.</option><option>นาย</option><option>นางสาว</option></datalist>
+    <div class="grid" style="grid-template-columns:1fr 1fr">
+      <div><label class="l">ชื่อ</label><input class="f" id="e4" value="${esc(s.first)}"></div>
+      <div><label class="l">นามสกุล</label><input class="f" id="e5" value="${esc(s.last)}"></div>
+    </div>`,
+  [{label:'ยกเลิก'},{label:'บันทึก',cls:'pri',onClick:()=>{
+    const code=$('#e2').value.trim();
+    if(cls().students.some(x=>x.id!==id&&String(x.code)===code))return toast('เลขประจำตัวซ้ำกับคนอื่น');
+    Object.assign(s,{no:+$('#e1').value||0,code,prefix:$('#e3').value.trim(),first:$('#e4').value.trim(),last:$('#e5').value.trim()});
+    save();closeModal();renderStudents();toast('บันทึกแล้ว');
+  }}]);
+}
+function delStudent(id){const s=cls().students.find(x=>x.id===id);confirmBox(`ลบ ${esc(fullName(s))} ออกจากห้อง?`,()=>{cls().students=cls().students.filter(x=>x.id!==id);save();render();toast('ลบแล้ว')},'ลบ')}
+function delAllStudents(){confirmBox(`ลบรายชื่อนักเรียนทั้งหมด ${cls().students.length} คนในห้อง ${esc(cls().name)}?`,()=>{cls().students=[];save();render();toast('ลบรายชื่อทั้งหมดแล้ว')},'ลบทั้งหมด')}
+
+function downloadTemplate(){
+  if(!xlsxOK())return;
+  const ws=XLSX.utils.aoa_to_sheet([['เลขที่','เลขประจำตัว','คำนำหน้า','ชื่อ','นามสกุล'],[1,'31001','ด.ช.','ภาคิน','วงศ์ดี'],[2,'31002','ด.ญ.','ณัฐธิดา','มีสุข']]);
+  ws['!cols']=[{wch:8},{wch:14},{wch:10},{wch:18},{wch:18}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'รายชื่อ');XLSX.writeFile(wb,'แบบฟอร์มรายชื่อนักเรียน.xlsx');
+}
+$('#fileXl').onchange=e=>{if(e.target.files[0])importExcel(e.target.files[0]);e.target.value=''};
+const PREFIXES=['เด็กชาย','เด็กหญิง','ด.ช.','ด.ญ.','นางสาว','น.ส.','นาย','นาง'];
+function splitPrefix(n){n=String(n||'').trim();for(const p of PREFIXES)if(n.startsWith(p)){let pre=p==='เด็กชาย'?'ด.ช.':p==='เด็กหญิง'?'ด.ญ.':p;return[pre,n.slice(p.length).trim()]}return['',n]}
+function importExcel(file){
+  if(!xlsxOK())return;
+  const fr=new FileReader();
+  fr.onload=ev=>{
+    try{
+      const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
+      const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:'',raw:false}).map(r=>r.map(x=>String(x).trim()));
+      const parsed=parseRows(rows);
+      if(!parsed.length)return toast('ไม่พบรายชื่อในไฟล์');
+      previewImport(parsed);
+    }catch(err){console.error(err);toast('อ่านไฟล์ไม่สำเร็จ')}
+  };
+  fr.readAsArrayBuffer(file);
+}
+function parseRows(rows){
+  let hi=rows.findIndex(r=>r.some(c=>/ชื่อ|name/i.test(c)));
+  const col={no:-1,code:-1,pre:-1,first:-1,last:-1,full:-1};
+  if(hi>=0){
+    rows[hi].forEach((h,i)=>{const t=h.replace(/\s/g,'').toLowerCase();
+      if(col.no<0&&/^(เลขที่|ที่|no\.?|ลำดับ)$/.test(t))col.no=i;
+      else if(col.code<0&&/(เลขประจำตัว|รหัส|^id$|studentid|code)/.test(t))col.code=i;
+      else if(col.pre<0&&/(คำนำหน้า|prefix|title)/.test(t))col.pre=i;
+      else if(col.full<0&&/(ชื่อ-?สกุล|ชื่อ-?นามสกุล|fullname)/.test(t))col.full=i;
+      else if(col.last<0&&/(นามสกุล|สกุล|lastname|surname)/.test(t))col.last=i;
+      else if(col.first<0&&/(^ชื่อ$|firstname|^name$|ชื่อนักเรียน)/.test(t))col.first=i;
+    });
+    if(col.first<0&&col.full<0){const i=rows[hi].findIndex(h=>/ชื่อ/.test(h));col.full=i}
+  }else{hi=-1;col.no=0;col.code=1;col.full=2}
+  const out=[];
+  rows.slice(hi+1).forEach((r,idx)=>{
+    let pre=col.pre>=0?r[col.pre]:'',first=col.first>=0?r[col.first]:'',last=col.last>=0?r[col.last]:'';
+    if(col.full>=0&&r[col.full]){const parts=r[col.full].split(/\s+/);const [p,f]=splitPrefix(parts[0]);if(!pre)pre=p;if(f===''&&parts.length>2){first=parts[1];last=parts.slice(2).join(' ')}else{first=f||parts[0];if(!pre&&p)pre=p;last=parts.slice(1).join(' ')}}
+    if(!pre&&first){const [p,f]=splitPrefix(first);if(p){pre=p;first=f}}
+    if(!first)return;
+    out.push({no:+(col.no>=0?r[col.no]:'')||idx+1,code:col.code>=0?r[col.code]:'',prefix:pre,first,last});
+  });
+  return out;
+}
+function previewImport(list){
+  modal(`📥 พบรายชื่อ ${list.length} คน`,`
+    <p class="sm mut">ตรวจสอบรายชื่อก่อนนำเข้าห้อง <b>${esc(cls().name)}</b></p>
+    <div class="tw" style="max-height:320px"><table><thead><tr><th>เลขที่</th><th>เลขประจำตัว</th><th>ชื่อ-สกุล</th></tr></thead><tbody>
+    ${list.slice(0,200).map(s=>`<tr><td>${s.no}</td><td>${esc(s.code)||'<span class="mut">(สร้างอัตโนมัติ)</span>'}</td><td>${esc(fullName(s))}</td></tr>`).join('')}</tbody></table></div>`,
+  [{label:'ยกเลิก'},
+   {label:'แทนที่รายชื่อเดิม',cls:'danger',onClick:()=>doImport(list,true)},
+   {label:'➕ เพิ่มต่อจากเดิม',cls:'pri',onClick:()=>doImport(list,false)}],true);
+}
+function doImport(list,replace){
+  const c=cls();if(replace)c.students=[];
+  let add=0,upd=0;
+  list.forEach(s=>{
+    const code=s.code||String(31000+s.no+Math.floor(Math.random()*900));
+    const ex=s.code&&c.students.find(x=>String(x.code)===String(s.code));
+    if(ex){Object.assign(ex,{no:s.no,prefix:s.prefix,first:s.first,last:s.last});upd++}
+    else{c.students.push({id:uid(),no:s.no,code,prefix:s.prefix,first:s.first,last:s.last});add++}
+  });
+  save();closeModal();render();toast(`นำเข้าแล้ว: เพิ่ม ${add} คน${upd?`, อัปเดต ${upd} คน`:''}`);
+}
+/* QR content: readable on any phone camera + parsable by the in-app scanner */
+function qrText(s,c){return `เลขประจำตัว: ${s.code}\nเลขที่: ${s.no}\nชื่อ: ${fullName(s)}\nห้อง: ${c?c.name:''}`}
+function findScanned(txt){
+  const list=cls().students;txt=String(txt||'').trim();
+  const plain=txt.replace(/^HW[:\-]?/i,'');
+  let st=list.find(s=>String(s.code)===plain||s.id===plain);if(st)return st;
+  const m=txt.match(/เลขประจำตัว\s*[:：]\s*([^\s\n]+)/);
+  if(m&&(st=list.find(s=>String(s.code)===m[1])))return st;
+  const toks=new Set(txt.split(/[^0-9A-Za-z_\-]+/).filter(Boolean));
+  return list.find(s=>toks.has(String(s.code)))||null;
+}
+function qrSVG(text,cell=5){if(!window.qrcode)return '<p>โหลด QR ไม่สำเร็จ</p>';const q=qrcode(0,'M');q.addData(unescape(encodeURIComponent(String(text))),'Byte');q.make();return q.createSvgTag({cellSize:cell,margin:2})}
+function qrCardHTML(s,c){
+  return `<div class="qc"><div class="qh">${esc(db.settings.school||'บัตรส่งการบ้าน')} · ห้อง ${esc(c.name)}</div>
+    <div class="qq">${qrSVG(qrText(s,c),4)}</div>
+    <div class="qn">${esc(fullName(s))}</div>
+    <table class="qt"><tr><td>เลขที่</td><td><b>${esc(s.no)}</b></td></tr><tr><td>เลขประจำตัว</td><td><b>${esc(s.code)}</b></td></tr></table></div>`;
+}
+const QR_CSS=`.qg{display:grid;grid-template-columns:repeat(3,1fr);gap:5mm}
+.qc{border:1.5px dashed #8a8fb0;border-radius:10px;padding:3mm 3mm 4mm;text-align:center;page-break-inside:avoid;break-inside:avoid;font-family:'Noto Sans Thai',sans-serif;background:#fff}
+.qh{background:#4f46e5;color:#fff;border-radius:6px;font-size:11px;font-weight:700;padding:1.5mm 2mm;margin-bottom:2mm}
+.qq svg{width:36mm;height:36mm;display:block;margin:auto}
+.qn{font-weight:800;font-size:15px;margin:1.5mm 0 1mm;line-height:1.3}
+.qt{margin:auto;font-size:12.5px;border-collapse:collapse}.qt td{padding:.5mm 2mm;text-align:left}.qt td:first-child{color:#555}`;
+function showQR(id){const c=cls(),s=c.students.find(x=>x.id===id);modal('QR ของนักเรียน',`<style>${QR_CSS}.md .qc{max-width:260px;margin:10px auto}.md .qq svg{width:190px;height:190px}</style>${qrCardHTML(s,c)}`,[{label:'ปิด'},{label:'🖨 พิมพ์บัตรนี้',cls:'pri',onClick:()=>printQR([id])}])}
+function printQR(ids){
+  const c=cls();const list=students().filter(s=>!ids||ids.includes(s.id));
+  const w=window.open('','_blank');if(!w)return toast('เบราว์เซอร์บล็อกหน้าต่างใหม่ กรุณาอนุญาต pop-up');
+  w.document.write(`<html><head><meta charset="utf-8"><title>บัตร QR ${esc(c.name)}</title><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700;800&display=swap" rel="stylesheet"><style>@page{size:A4;margin:10mm}body{font-family:'Noto Sans Thai',sans-serif;margin:0}h2{margin:0 0 4mm;font-size:16px}.bar{margin-bottom:4mm}@media print{.bar{display:none}}${QR_CSS}</style></head><body><div class="bar"><button onclick="print()" style="padding:8px 16px;font-size:15px">🖨 พิมพ์</button></div><h2>บัตร QR ส่งการบ้าน · ห้อง ${esc(c.name)} (${list.length} คน)</h2><div class="qg">${list.map(s=>qrCardHTML(s,c)).join('')}</div><script>(document.fonts?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(()=>print(),300))<\/script></body></html>`);
+  w.document.close();
+}
+
+/* ================== DASHBOARD ================== */
+function renderDash(){
+  const c=cls();if(!c){renderCheck();return}
+  const st=students(),allA=c.subjects.flatMap(s=>s.assignments.map(a=>({a,s})));
+  let tot={sent:0,late:0,excused:0,missing:0,none:0};
+  allA.forEach(({a})=>{const k=counts(a,st);for(const x in tot)tot[x]+=k[x]});
+  const miss={};st.forEach(s=>miss[s.id]={s,n:0,list:[]});
+  allA.forEach(({a,s:sub})=>st.forEach(s=>{const x=a.records[s.id]?.s;if(x==='missing'||(!x&&isOver(a))){miss[s.id].n++;miss[s.id].list.push(sub.name+': '+a.title)}}));
+  const top=Object.values(miss).filter(x=>x.n).sort((a,b)=>b.n-a.n).slice(0,10);
+  const recent=allA.slice().sort((x,y)=>(y.a.due||'').localeCompare(x.a.due||'')).slice(0,8);
+  const col=v=>v>=80?'var(--g)':v>=50?'var(--y)':'var(--r)';
+  $('#app').innerHTML=`
+  <div class="kpis">
+    <div class="kpi"><span>👥 นักเรียน</span><b>${st.length}</b></div>
+    <div class="kpi"><span>📚 รายวิชา</span><b>${c.subjects.length}</b></div>
+    <div class="kpi"><span>📝 งานทั้งหมด</span><b>${allA.length}</b></div>
+    <div class="kpi"><span>📈 อัตราการส่งรวม</span><b style="color:${col(rate(tot))}">${allA.length?rate(tot)+'%':'-'}</b></div>
+  </div>
+  <div class="two">
+    <div class="card"><h3>อัตราการส่งงานรายวิชา</h3>
+      ${c.subjects.length?c.subjects.map(s=>{let k={sent:0,late:0,excused:0,missing:0,none:0};s.assignments.forEach(a=>{const q=counts(a,st);for(const x in k)k[x]+=q[x]});const r=rate(k);
+        return `<div class="hb"><div class="t"><b>${esc(s.name)}</b><span class="mut">${s.assignments.length} งาน · <b style="color:${col(r)}">${s.assignments.length?r+'%':'-'}</b></span></div><div class="bar"><i style="width:${s.assignments.length?r:0}%;background:${col(r)}"></i></div></div>`}).join(''):'<p class="mut">ยังไม่มีรายวิชา</p>'}
+    </div>
+    <div class="card"><h3>⚠️ นักเรียนที่ค้างส่งมากที่สุด</h3>
+      ${top.length?`<ul class="lst">${top.map(x=>`<li title="${esc(x.list.join('\n'))}"><span>${x.s.no}. ${esc(fullName(x.s))}</span><span class="badge r">ค้าง ${x.n} งาน</span></li>`).join('')}</ul>`:'<p class="mut">🎉 ไม่มีนักเรียนค้างส่งงาน</p>'}
+    </div>
+  </div>
+  <div class="card"><h3>งานล่าสุด</h3>
+    ${recent.length?`<div class="tw"><table><thead><tr><th>งาน</th><th>วิชา</th><th>กำหนดส่ง</th><th class="c">ส่ง</th><th class="c">ช้า</th><th class="c">ไม่ส่ง</th><th class="c">ยังไม่ตรวจ</th><th style="min-width:140px">อัตรา</th></tr></thead><tbody>
+    ${recent.map(({a,s})=>{const k=counts(a,st),r=rate(k);return `<tr style="cursor:pointer" onclick="db.cur.subjectId='${s.id}';db.cur.assignmentId='${a.id}';save();document.querySelector('[data-t=check]').click()"><td><b>${esc(a.title)}</b></td><td>${esc(s.name)}</td><td>${thDate(a.due)} ${isOver(a)?'<span class="badge r">เลย</span>':''}</td><td class="c">${k.sent}</td><td class="c">${k.late}</td><td class="c">${k.missing}</td><td class="c">${k.none}</td><td><div class="bar"><i style="width:${r}%;background:${col(r)}"></i></div><span class="sm">${r}%</span></td></tr>`}).join('')}
+    </tbody></table></div>`:'<p class="mut">ยังไม่มีงาน</p>'}
+  </div>`;
+}
+
+/* ================== REPORT ================== */
+let repSub=null,rep={mode:'all',from:'',to:''};
+const TH_M=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+function rangeOf(){const t=todayISO();
+  if(rep.mode==='today')return[t,t];
+  if(rep.mode==='month'){const m=t.slice(0,7);return[m+'-01',m+'-31']}
+  if(rep.mode==='custom')return[rep.from||'0000-00-00',rep.to||'9999-12-31'];
+  return null}
+function rangeLabel(){const t=todayISO();
+  if(rep.mode==='today')return 'วันนี้ ('+thDate(t)+')';
+  if(rep.mode==='month')return 'เดือนนี้ ('+TH_M[+t.slice(5,7)-1]+' '+(+t.slice(0,4)+543)+')';
+  if(rep.mode==='custom')return (rep.from?thDate(rep.from):'เริ่มต้น')+' – '+(rep.to?thDate(rep.to):'ปัจจุบัน');
+  return 'ทั้งหมด'}
+function repData(){
+  const c=cls(),r=rangeOf(),st=students();
+  const subs=repSub==='__all'?c.subjects:c.subjects.filter(s=>s.id===repSub);
+  const A=subs.flatMap(s=>s.assignments.map(a=>({a,s})))
+    .filter(({a})=>!r||((a.due||'')>=r[0]&&(a.due||'')<=r[1]))
+    .sort((x,y)=>(x.a.due||'').localeCompare(y.a.due||'')||x.s.name.localeCompare(y.s.name));
+  const tot={sent:0,late:0,excused:0,missing:0,none:0};
+  const rows=st.map(x=>{const k={sent:0,late:0,excused:0,missing:0,none:0};const pend=[];
+    A.forEach(({a,s})=>{const rr=a.records[x.id]||{};k[rr.s||'none']++;tot[rr.s||'none']++;if(rr.s==='missing'||(!rr.s&&isOver(a)))pend.push({a,s,r:rr.r||''})});
+    return{x,k,pend}});
+  const subName=repSub==='__all'?'ทุกวิชา':'วิชา'+(subs[0]?.name||'');
+  return{c,subs,A,st,rows,tot,subName,all:repSub==='__all'};
+}
+function renderReport(){
+  const c=cls();if(!c){renderCheck();return}
+  if(repSub!=='__all'&&!c.subjects.find(s=>s.id===repSub))repSub=subj()?.id||c.subjects[0]?.id;
+  if(!c.subjects.length){$('#app').innerHTML='<div class="card empty"><div class="ico">📊</div><p>ยังไม่มีรายวิชา</p></div>';return}
+  const D=repData(),{A,st,rows}=D,one=!D.all?D.subs[0]:null;
+  const modes=[['all','ทั้งหมด'],['today','วันนี้'],['month','เดือนนี้'],['custom','ระบุช่วงเวลา']];
+  $('#app').innerHTML=`
+  <div class="card noprint">
+    <div class="filt">
+      <b>📊 รายงาน</b>
+      <select class="f" style="width:auto;min-width:180px" onchange="repSub=this.value;renderReport()"><option value="__all" ${D.all?'selected':''}>📚 ทุกวิชา</option>${c.subjects.map(x=>`<option value="${x.id}" ${x.id===repSub?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
+      <div class="seg">${modes.map(([m,l])=>`<button class="${rep.mode===m?'on':''}" onclick="rep.mode='${m}';renderReport()">${l}</button>`).join('')}</div>
+      ${rep.mode==='custom'?`<span class="filt" style="gap:6px"><input type="date" class="f" value="${rep.from}" onchange="rep.from=this.value;renderReport()"> ถึง <input type="date" class="f" value="${rep.to}" onchange="rep.to=this.value;renderReport()"></span>`:''}
+    </div>
+    <div class="filt" style="margin-top:10px">
+      <span class="sm mut">กรองตามวันกำหนดส่งของงาน · ${rangeLabel()} · พบ ${A.length} งาน</span>
+      <span style="flex:1"></span>
+      <button class="btn xl" onclick="exportReport()" ${A.length?'':'disabled'}>⬇ Excel</button>
+      <button class="btn line" onclick="reportImage()" ${A.length?'':'disabled'}>🖼 รูปภาพส่ง LINE</button>
+      <button class="btn" onclick="print()">🖨 พิมพ์ / PDF</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="printonly"><h2>${esc(db.settings.school||'')}</h2></div>
+    <h2>สรุปการส่งงาน ${esc(D.subName)} ${one?.code?'('+esc(one.code)+')':''} · ${esc(c.name)}</h2>
+    <p class="meta">${one?.teacher?'ครูผู้สอน: '+esc(one.teacher)+' · ':''}ช่วงเวลา: <b>${rangeLabel()}</b> · ${A.length} งาน · นักเรียน ${st.length} คน · อัตราการส่งรวม <b>${A.length?rate(D.tot)+'%':'-'}</b></p>
+    <p class="sm"><span class="mx sent">✓</span> ส่งแล้ว &nbsp; <span class="mx late">ช</span> ส่งช้า &nbsp; <span class="mx excused">ย</span> ยกเว้น &nbsp; <span class="mx missing">✗</span> ไม่ส่ง &nbsp; <span class="mx none">–</span> ยังไม่ตรวจ</p>
+    ${A.length?`<div class="tw"><table><thead><tr><th class="c">ที่</th><th>เลขประจำตัว</th><th>ชื่อ-สกุล</th>${A.map(({a,s},i)=>`<th class="c" title="${esc(s.name+': '+a.title)}">${i+1}<div class="sm mut" style="font-weight:500">${D.all?esc(s.name.slice(0,8))+'<br>':''}${thDate(a.due)}</div></th>`).join('')}<th class="c">ส่ง</th><th class="c">ช้า</th><th class="c">ไม่ส่ง</th><th class="c">%</th></tr></thead><tbody>
+    ${rows.map(({x,k})=>`<tr><td class="c">${x.no}</td><td>${esc(x.code)}</td><td>${esc(fullName(x))}</td>${A.map(({a})=>{const r=a.records[x.id]||{};return `<td class="c"><span class="mx ${r.s||'none'}" title="${esc((r.s?ST[r.s].label:'ยังไม่ตรวจ')+(r.r?' – '+r.r:''))}">${r.s?ST[r.s].sym:'–'}</span>${r.r?'<sup style="color:var(--pri)">*</sup>':''}</td>`}).join('')}
+      <td class="c">${k.sent}</td><td class="c">${k.late}</td><td class="c" style="color:${k.missing?'var(--r)':''}">${k.missing}</td><td class="c"><b>${rate(k)}%</b></td></tr>`).join('')}
+    <tr style="background:#fafaff"><td colspan="3"><b>อัตราการส่งรายงาน</b></td>${A.map(({a})=>`<td class="c"><b>${rate(counts(a,st))}%</b></td>`).join('')}<td colspan="4"></td></tr>
+    </tbody></table></div>
+    <p class="sm mut">* มีหมายเหตุ (ชี้ที่สัญลักษณ์เพื่อดูเหตุผล)</p>
+    <h3 style="margin-top:18px">รายการงาน</h3>
+    <ol class="sm" style="margin:0;padding-left:22px">${A.map(({a,s})=>{const k=counts(a,st);return `<li>${D.all?'['+esc(s.name)+'] ':''}<b>${esc(a.title)}</b> – กำหนดส่ง ${thDate(a.due)} · ส่ง ${k.sent} ช้า ${k.late} ยกเว้น ${k.excused} ไม่ส่ง ${k.missing} ยังไม่ตรวจ ${k.none}</li>`}).join('')}</ol>`:`<div class="empty"><div class="ico">🗓</div>ไม่มีงานที่กำหนดส่งในช่วง "${rangeLabel()}"</div>`}
+  </div>
+  ${A.length?`<div class="card"><h3>❗ รายชื่อค้างส่งงาน พร้อมเหตุผล</h3>
+    ${rows.some(r=>r.pend.length)?`<div class="tw"><table><thead><tr><th class="c">ที่</th><th>ชื่อ-สกุล</th><th>งานที่ค้าง</th><th>เหตุผล</th></tr></thead><tbody>
+    ${rows.filter(r=>r.pend.length).map(({x,pend})=>pend.map((p,i)=>`<tr>${i===0?`<td class="c" rowspan="${pend.length}">${x.no}</td><td rowspan="${pend.length}"><b>${esc(fullName(x))}</b><div class="sm mut">ค้าง ${pend.length} งาน</div></td>`:''}<td>${D.all?esc(p.s.name)+': ':''}${esc(p.a.title)}</td><td style="white-space:normal">${esc(p.r)||'<span class="mut">-</span>'}</td></tr>`).join('')).join('')}
+    </tbody></table></div>`:'<p class="mut">🎉 ไม่มีนักเรียนค้างส่ง</p>'}</div>`:''}`;
+}
+function exportReport(){
+  if(!xlsxOK())return;const D=repData(),{c,A,st}=D;
+  const m=[[`สรุปการส่งงาน ${D.subName} ห้อง ${c.name}`],[`ช่วงเวลา: ${rangeLabel()}  ข้อมูล ณ ${thDate(todayISO(),true)}`],[],['เลขที่','เลขประจำตัว','ชื่อ-สกุล',...A.map(({a,s})=>`${D.all?s.name+': ':''}${a.title} (${thDate(a.due)})`),'ส่ง','ส่งช้า','ยกเว้น','ไม่ส่ง','ยังไม่ตรวจ','% การส่ง']];
+  D.rows.forEach(({x,k})=>m.push([x.no,x.code,fullName(x),...A.map(({a})=>{const r=a.records[x.id]||{};return r.s?ST[r.s].label:'-'}),k.sent,k.late,k.excused,k.missing,k.none,rate(k)+'%']));
+  m.push(['','','อัตราการส่ง',...A.map(({a})=>rate(counts(a,st))+'%')]);
+  const d=[['เลขที่','เลขประจำตัว','ชื่อ-สกุล','วิชา','งาน','กำหนดส่ง','สถานะ','เวลาบันทึก','เหตุผล/หมายเหตุ']];
+  A.forEach(({a,s})=>st.forEach(x=>{const r=a.records[x.id]||{};d.push([x.no,x.code,fullName(x),s.name,a.title,a.due,r.s?ST[r.s].label:'ยังไม่ตรวจ',r.t?new Date(r.t).toLocaleString('th-TH'):'',r.r||''])}));
+  const wb=XLSX.utils.book_new();
+  const w1=XLSX.utils.aoa_to_sheet(m);w1['!cols']=[{wch:7},{wch:13},{wch:28},...A.map(()=>({wch:18})),{wch:7},{wch:7},{wch:7},{wch:7},{wch:10},{wch:9}];
+  const w2=XLSX.utils.aoa_to_sheet(d);w2['!cols']=[{wch:7},{wch:13},{wch:28},{wch:16},{wch:24},{wch:12},{wch:11},{wch:20},{wch:30}];
+  XLSX.utils.book_append_sheet(wb,w1,'สรุป');XLSX.utils.book_append_sheet(wb,w2,'รายละเอียด+เหตุผล');
+  XLSX.writeFile(wb,safeName(`รายงานส่งงาน_${c.name}_${D.subName}_${rangeLabel()}.xlsx`));
+}
+/* ----- export report as image (for LINE) ----- */
+function snapHTML(D){
+  const {c,A,st,tot}=D,col=v=>v>=80?'#16a34a':v>=50?'#d97706':'#dc2626';
+  const pend=D.rows.filter(r=>r.pend.length).sort((a,b)=>b.pend.length-a.pend.length||a.x.no-b.x.no);
+  const MAXP=22,MAXA=10;
+  const box=(n,l,bg,fg)=>`<div style="flex:1;background:${bg};color:${fg};border-radius:12px;padding:10px 4px;text-align:center"><div style="font-size:26px;font-weight:800;line-height:1.2">${n}</div><div style="font-size:13px;font-weight:700">${l}</div></div>`;
+  return `<div style="background:linear-gradient(90deg,#4338ca,#6d63ff);color:#fff;padding:20px 24px">
+      <div style="font-size:13px;opacity:.9">${esc(db.settings.school||'HomeworkCheck')}</div>
+      <div style="font-size:24px;font-weight:800;margin-top:2px">📊 สรุปการส่งงาน ${esc(D.subName)}</div>
+      <div style="font-size:15px;margin-top:4px">ห้อง ${esc(c.name)} · ${rangeLabel()} · ${A.length} งาน · ${st.length} คน</div>
+    </div>
+    <div style="padding:18px 24px">
+      <div style="display:flex;gap:8px">${box(tot.sent,'ส่งแล้ว','#dcfce7','#16a34a')}${box(tot.late,'ส่งช้า','#fef3c7','#d97706')}${box(tot.excused,'ยกเว้น','#e0f2fe','#0284c7')}${box(tot.missing,'ไม่ส่ง','#fee2e2','#dc2626')}${box(tot.none,'ยังไม่ตรวจ','#f1f2f6','#6b7280')}</div>
+      <div style="margin:14px 0 4px;display:flex;justify-content:space-between;font-weight:700"><span>อัตราการส่งรวม</span><span style="color:${col(rate(tot))}">${rate(tot)}%</span></div>
+      <div style="height:10px;background:#eceef5;border-radius:99px;overflow:hidden"><div style="height:100%;width:${rate(tot)}%;background:${col(rate(tot))}"></div></div>
+      <div style="font-weight:800;font-size:16px;margin:18px 0 8px">📝 รายงาน</div>
+      ${A.slice(-MAXA).map(({a,s})=>{const r=rate(counts(a,st));return `<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:14px"><span>${D.all?'<b>'+esc(s.name)+'</b> · ':''}${esc(a.title)} <span style="color:#6b7086">(${thDate(a.due)})</span></span><b style="color:${col(r)}">${r}%</b></div><div style="height:7px;background:#eceef5;border-radius:99px;overflow:hidden;margin-top:3px"><div style="height:100%;width:${r}%;background:${col(r)}"></div></div></div>`}).join('')}
+      ${A.length>MAXA?`<div style="font-size:13px;color:#6b7086">…และงานก่อนหน้าอีก ${A.length-MAXA} งาน</div>`:''}
+      <div style="font-weight:800;font-size:16px;margin:18px 0 8px">❗ ค้างส่ง (${pend.length} คน)</div>
+      ${pend.length?`<table style="width:100%;border-collapse:collapse;font-size:14px">${pend.slice(0,MAXP).map(({x,pend:p})=>`<tr><td style="padding:5px 6px;border-bottom:1px solid #eee;width:34px;color:#4f46e5;font-weight:700">${x.no}</td><td style="padding:5px 6px;border-bottom:1px solid #eee"><b>${esc(fullName(x))}</b><div style="font-size:12px;color:#6b7086">${esc(p.map(q=>(D.all?q.s.name+': ':'')+q.a.title+(q.r?' ('+q.r+')':'')).join(', ').slice(0,140))}</div></td><td style="padding:5px 6px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap"><span style="background:#fee2e2;color:#dc2626;border-radius:6px;padding:2px 8px;font-weight:700;font-size:12px">${p.length} งาน</span></td></tr>`).join('')}</table>${pend.length>MAXP?`<div style="font-size:13px;color:#6b7086;margin-top:6px">…และอีก ${pend.length-MAXP} คน</div>`:''}`:tot.none?`<div style="background:#f1f2f6;color:#6b7280;border-radius:10px;padding:12px;text-align:center;font-weight:700">ยังไม่มีคนค้างส่ง · รอตรวจอีก ${tot.none} รายการ</div>`:'<div style="background:#dcfce7;color:#16a34a;border-radius:10px;padding:12px;text-align:center;font-weight:700">🎉 ส่งครบทุกคน</div>'}
+      <div style="margin-top:16px;font-size:12px;color:#9aa0b8;text-align:right">สร้างเมื่อ ${new Date().toLocaleString('th-TH')}</div>
+    </div>`;
+}
+async function reportImage(){
+  if(!window.html2canvas)return toast('โหลดไลบรารีสร้างรูปไม่สำเร็จ – ตรวจสอบอินเทอร์เน็ต');
+  const D=repData();
+  const el=document.createElement('div');
+  el.style.cssText="position:fixed;left:-10000px;top:0;width:720px;background:#fff;font-family:'Noto Sans Thai',sans-serif;color:#1f2333";
+  el.innerHTML=snapHTML(D);document.body.appendChild(el);
+  toast('กำลังสร้างรูปภาพ…');
+  try{
+    if(document.fonts)await document.fonts.ready;
+    const cv=await html2canvas(el,{scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false});
+    const blob=await new Promise(r=>cv.toBlob(r,'image/png'));
+    const url=URL.createObjectURL(blob),fname=safeName(`สรุปส่งงาน_${D.c.name}_${D.subName}.png`);
+    const file=new File([blob],fname,{type:'image/png'});
+    const canShare=navigator.canShare&&navigator.canShare({files:[file]});
+    const canCopy=!!(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write);
+    modal('🖼 รูปภาพสรุปสำหรับส่ง LINE',`<img src="${url}" style="width:100%;border-radius:10px;border:1px solid var(--line);margin-top:8px">
+      <div class="tip">📱 <b>มือถือ:</b> กด "แชร์" แล้วเลือก LINE<br>💻 <b>คอมพิวเตอร์:</b> กด "คัดลอกรูป" แล้ววาง (Ctrl+V) ในแชท LINE หรือดาวน์โหลดแล้วแนบไฟล์</div>`,[
+      {label:'⬇ ดาวน์โหลด',onClick:()=>{const a=document.createElement('a');a.href=url;a.download=fname;a.click()}},
+      ...(canCopy?[{label:'📋 คัดลอกรูป',onClick:()=>navigator.clipboard.write([new ClipboardItem({'image/png':blob})]).then(()=>toast('คัดลอกรูปแล้ว – วางในแชท LINE ได้เลย')).catch(()=>toast('คัดลอกไม่สำเร็จ ลองดาวน์โหลดแทน'))}]:[]),
+      ...(canShare?[{label:'📤 แชร์ไป LINE',cls:'line',onClick:()=>navigator.share({files:[file],title:'สรุปการส่งงาน'}).catch(()=>{})}]:[])],true);
+  }catch(e){console.error(e);toast('สร้างรูปไม่สำเร็จ')}
+  finally{el.remove()}
+}
+
+/* ================== SETTINGS ================== */
+function renderSettings(){
+  $('#app').innerHTML=`
+  <div class="card"><h3>🏫 ข้อมูลโรงเรียน</h3>
+    <div class="grid" style="grid-template-columns:1fr 1fr">
+      <div><label class="l">ชื่อโรงเรียน (แสดงในรายงานที่พิมพ์)</label><input class="f" value="${esc(db.settings.school)}" oninput="db.settings.school=this.value;saveSoon()"></div>
+      <div><label class="l">ชื่อครูผู้สอน (ค่าเริ่มต้นตอนเพิ่มวิชา)</label><input class="f" value="${esc(db.settings.teacher)}" oninput="db.settings.teacher=this.value;saveSoon()"></div>
+    </div>
+  </div>
+  <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="margin:0">🏷 ห้องเรียน</h3><button class="btn pri sm" onclick="classModal()">+ เพิ่มห้องเรียน</button></div>
+    <ul class="lst">${db.classes.map(c=>`<li><span><b>${esc(c.name)}</b> <span class="mut sm">· ${c.students.length} คน · ${c.subjects.length} วิชา${c.teacher?' · ครูประจำชั้น '+esc(c.teacher):''}</span></span><span><button class="btn sm" onclick="classModal('${c.id}')">✎</button> <button class="btn sm danger" onclick="delClass('${c.id}')">ลบ</button></span></li>`).join('')}</ul>
+  </div>
+  <div class="card"><h3>📚 รายวิชาในห้อง ${esc(cls()?.name||'')}</h3>
+    ${cls()?.subjects.length?`<ul class="lst">${cls().subjects.map(s=>`<li><span><b>${esc(s.name)}</b> <span class="mut sm">${esc(s.code||'')} · ${s.assignments.length} งาน${s.teacher?' · '+esc(s.teacher):''}</span></span><span><button class="btn sm" onclick="subjectModal('${s.id}')">✎</button> <button class="btn sm danger" onclick="delSubject('${s.id}')">ลบ</button></span></li>`).join('')}</ul>`:'<p class="mut">ยังไม่มีรายวิชา</p>'}
+    <button class="btn sm" style="margin-top:8px" onclick="subjectModal()">+ เพิ่มรายวิชา</button>
+  </div>
+  <div class="card"><h3>💾 สำรอง / กู้คืนข้อมูล</h3>
+    <p class="sm mut">ข้อมูลเก็บไว้ในเบราว์เซอร์เครื่องนี้ (localStorage) แนะนำให้สำรองเป็นไฟล์เป็นระยะ หรือใช้ไฟล์สำรองย้ายไปเครื่องอื่น</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn pri" onclick="backup()">⬇ สำรองข้อมูล (.json)</button>
+      <button class="btn" onclick="$('#fileJson').click()">⬆ กู้คืนจากไฟล์</button>
+      <button class="btn danger" onclick="confirmBox('ลบข้อมูลทั้งหมดและเริ่มใหม่? (ไม่สามารถย้อนกลับได้)',()=>{db=seed();save();render();toast('รีเซ็ตแล้ว')},'ลบทั้งหมด')">🗑 รีเซ็ตทั้งหมด</button>
+    </div>
+  </div>`;
+}
+function delClass(id){if(db.classes.length<=1)return toast('ต้องมีอย่างน้อย 1 ห้อง');const c=db.classes.find(x=>x.id===id);confirmBox(`ลบห้อง ${esc(c.name)} พร้อมรายชื่อและข้อมูลทั้งหมด?`,()=>{db.classes=db.classes.filter(x=>x.id!==id);db.cur.classId=db.classes[0].id;db.cur.subjectId=null;save();render()},'ลบ')}
+function delSubject(id){const s=cls().subjects.find(x=>x.id===id);confirmBox(`ลบวิชา ${esc(s.name)} และงานทั้งหมด ${s.assignments.length} งาน?`,()=>{cls().subjects=cls().subjects.filter(x=>x.id!==id);db.cur.subjectId=null;db.cur.assignmentId=null;save();render()},'ลบ')}
+function backup(){const b=new Blob([JSON.stringify(db,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`homeworkcheck_backup_${todayISO()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+$('#fileJson').onchange=e=>{const f=e.target.files[0];if(!f)return;const fr=new FileReader();fr.onload=()=>{try{const d=JSON.parse(fr.result);if(!Array.isArray(d.classes))throw 0;db=d;db.settings=db.settings||{};db.cur=db.cur||{};save();render();toast('กู้คืนข้อมูลแล้ว')}catch(err){toast('ไฟล์ไม่ถูกต้อง')}};fr.readAsText(f);e.target.value=''};
+
+/* ================== GOOGLE SHEETS SYNC ================== */
+const SKEY='homeworkcheck_sync';
+var sync=(()=>{try{return JSON.parse(localStorage.getItem(SKEY))||{}}catch(e){return{}}})();
+if(sync.auto===undefined)sync.auto=true;
+function saveSync(){try{localStorage.setItem(SKEY,JSON.stringify(sync))}catch(e){}}
+let syncBusy=false,syncAgain=false,syncT=null;
+function updateInd(state){
+  const el=$('#saveInd');if(!el)return;
+  if(state==='busy')el.textContent='☁️ กำลังซิงก์…';
+  else if(!sync.connected)el.textContent='💾 บันทึกในเครื่อง';
+  else if(sync.lastError)el.textContent='⚠️ ซิงก์ไม่สำเร็จ';
+  else if(sync.pending)el.textContent=`☁️ รอซิงก์ ${sync.pending}`;
+  else el.textContent='☁️ ซิงก์แล้ว';
+}
+function scheduleSync(){if(!sync.auto)return;clearTimeout(syncT);syncT=setTimeout(()=>pushAll({silent:true}),3000)}
+function genKey(){const ch='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';let s='hw_';for(let i=0;i<16;i++)s+=ch[Math.floor(Math.random()*ch.length)];return s}
+async function api(action,extra,cfg){
+  const url=(cfg||sync).url,key=(cfg||sync).key;
+  if(!url||!/^https:\/\/script\.google(usercontent)?\.com\//.test(url))throw new Error('URL เว็บแอปไม่ถูกต้อง (ต้องขึ้นต้นด้วย https://script.google.com/macros/s/…/exec)');
+  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),45000);
+  let res;
+  try{res=await fetch(url,{method:'POST',body:JSON.stringify(Object.assign({key,action},extra||{})),headers:{'Content-Type':'text/plain;charset=utf-8'},signal:ctl.signal,redirect:'follow'})}
+  catch(e){throw new Error(e.name==='AbortError'?'หมดเวลาเชื่อมต่อ':'เชื่อมต่อไม่ได้ – ตรวจ URL, อินเทอร์เน็ต และการตั้งค่า "ผู้มีสิทธิ์เข้าถึง: ทุกคน"')}
+  finally{clearTimeout(to)}
+  const txt=await res.text();let j;
+  try{j=JSON.parse(txt)}catch(e){throw new Error('เซิร์ฟเวอร์ไม่ได้ตอบเป็น JSON – อาจยังไม่ได้ Deploy เวอร์ชันใหม่ หรือสิทธิ์ไม่ใช่ "ทุกคน"')}
+  if(!j.ok){const er=new Error(j.error||'ผิดพลาด');er.conflict=!!j.conflict;er.remoteAt=j.updatedAt;throw er}
+  return j;
+}
+function cellSafe(v){v=v==null?'':v;return typeof v==='string'&&/^[=+\-@]/.test(v)?"'"+v:v}
+function buildTables(){
+  const S=[['ห้อง','เลขที่','เลขประจำตัว','คำนำหน้า','ชื่อ','นามสกุล']];
+  const W=[['ห้อง','วิชา','รหัสวิชา','ครูผู้สอน','งาน','กำหนดส่ง','ส่งแล้ว','ส่งช้า','ยกเว้น','ไม่ส่ง','ยังไม่ตรวจ','อัตราการส่ง (%)']];
+  const R=[['ห้อง','วิชา','งาน','กำหนดส่ง','เลขที่','เลขประจำตัว','ชื่อ-สกุล','สถานะ','เวลาบันทึก','เหตุผล/หมายเหตุ']];
+  db.classes.forEach(c=>{
+    const st=c.students.slice().sort((a,b)=>(a.no||0)-(b.no||0));
+    st.forEach(s=>S.push([c.name,s.no,s.code,s.prefix,s.first,s.last]));
+    c.subjects.forEach(sb=>sb.assignments.forEach(a=>{
+      const k=counts(a,st);W.push([c.name,sb.name,sb.code||'',sb.teacher||'',a.title,a.due||'',k.sent,k.late,k.excused,k.missing,k.none,rate(k)]);
+      st.forEach(s=>{const r=a.records[s.id]||{};R.push([c.name,sb.name,a.title,a.due||'',s.no,s.code,fullName(s),r.s?ST[r.s].label:'ยังไม่ตรวจ',r.t?new Date(r.t).toLocaleString('th-TH'):'',r.r||''])});
+    }));
+  });
+  const f=t=>t.map(r=>r.map(cellSafe));
+  return{'นักเรียน':f(S),'สรุปงาน':f(W),'การส่งงาน':f(R)};
+}
+async function pushAll(o={}){
+  if(!sync.connected&&!o.force)return;
+  if(syncBusy){syncAgain=true;return}
+  syncBusy=true;updateInd('busy');const sentPending=sync.pending||0;
+  try{
+    const j=await api('push',{data:db,tables:buildTables(),baseAt:sync.remoteAt||'',force:!!o.force});
+    sync.pending=Math.max(0,(sync.pending||0)-sentPending);sync.lastSync=Date.now();sync.remoteAt=j.updatedAt;sync.lastError='';
+    if(j.name)sync.sheetName=j.name;
+    if(!o.silent)toast('☁️ ส่งข้อมูลขึ้น Google Sheets แล้ว');
+  }catch(e){
+    sync.lastError=e.message;
+    if(e.conflict)conflictModal();
+    else if(!o.silent)toast('⚠️ '+e.message);
+  }finally{
+    syncBusy=false;saveSync();updateInd();if(tab==='sheets')renderSheets();
+    if(syncAgain){syncAgain=false;if(sync.pending)scheduleSync()}
+  }
+}
+async function pullAll(o={}){
+  syncBusy=true;updateInd('busy');
+  try{
+    const j=await api('pull');
+    if(!j.data||!Array.isArray(j.data.classes)){if(!o.silent)toast('ในชีตยังไม่มีข้อมูล');return false}
+    db=j.data;db.settings=db.settings||{};db.cur=db.cur||{};
+    sync.pending=0;sync.lastSync=Date.now();sync.remoteAt=j.updatedAt;sync.lastError='';
+    save(true);render();if(!o.silent)toast('⬇ ดึงข้อมูลจาก Google Sheets แล้ว');
+    return true;
+  }catch(e){sync.lastError=e.message;if(!o.silent)toast('⚠️ '+e.message);return false}
+  finally{syncBusy=false;saveSync();updateInd();if(tab==='sheets')renderSheets()}
+}
+async function smartSync(o={}){
+  if(!sync.connected)return;
+  try{
+    updateInd('busy');
+    const j=await api('ping');
+    sync.sheetName=j.name;sync.sheetUrl=j.url;
+    const remoteChanged=j.updatedAt&&j.updatedAt!==sync.remoteAt;
+    if(remoteChanged&&sync.pending){conflictModal();return}
+    if(remoteChanged){await pullAll(o);return}
+    if(sync.pending){await pushAll(o);return}
+    sync.lastSync=Date.now();sync.lastError='';if(!o.silent)toast('✅ ข้อมูลเป็นปัจจุบันแล้ว');
+  }catch(e){sync.lastError=e.message;if(!o.silent)toast('⚠️ '+e.message)}
+  finally{saveSync();updateInd();if(tab==='sheets')renderSheets()}
+}
+function conflictModal(){
+  modal('⚠️ ข้อมูลไม่ตรงกัน',`<p>ข้อมูลใน Google Sheets ถูกแก้ไขจากเครื่องอื่น และเครื่องนี้ก็มีการแก้ไขที่ยังไม่ได้ซิงก์ (${sync.pending||0} รายการ)</p><p class="sm mut">เลือกว่าจะใช้ข้อมูลชุดไหน อีกชุดจะถูกเขียนทับ</p>`,
+  [{label:'⬇ ใช้ข้อมูลจาก Google Sheets',onClick:()=>{closeModal();pullAll()}},{label:'⬆ ใช้ข้อมูลเครื่องนี้',cls:'pri',onClick:()=>{closeModal();pushAll({force:true})}}]);
+}
+async function testConn(){
+  const cfg={url:$('#gsUrl').value.trim(),key:$('#gsKey').value.trim()};
+  const el=$('#gsTest');el.innerHTML='⏳ กำลังทดสอบ…';
+  try{const j=await api('ping',{},cfg);el.innerHTML=`<span style="color:var(--g)">✅ เชื่อมต่อสำเร็จ – ไฟล์ "${esc(j.name)}"${j.updatedAt?' · มีข้อมูลในชีตแล้ว':' · ชีตยังว่าง'}</span>`}
+  catch(e){el.innerHTML=`<span style="color:var(--r)">❌ ${esc(e.message)}</span>`}
+}
+async function connectSheets(){
+  const url=$('#gsUrl').value.trim(),key=$('#gsKey').value.trim();
+  if(!url||!key)return toast('กรุณากรอก URL และรหัสลับ');
+  const el=$('#gsTest');el.innerHTML='⏳ กำลังเชื่อมต่อ…';
+  try{
+    const j=await api('ping',{},{url,key});
+    Object.assign(sync,{url,key,connected:true,sheetName:j.name,sheetUrl:j.url,lastError:'',remoteAt:''});saveSync();
+    if(j.updatedAt){
+      sync.remoteAt=j.updatedAt;saveSync();
+      modal('☁️ พบข้อมูลใน Google Sheets',`<p>ไฟล์ <b>${esc(j.name)}</b> มีข้อมูลอยู่แล้ว ต้องการใช้ข้อมูลชุดไหน?</p><p class="sm mut">• เครื่องอื่น / ครูร่วม ที่ต้องการใช้ข้อมูลเดียวกัน → เลือก <b>"ใช้ข้อมูลจาก Google Sheets"</b><br>• ข้อมูลในเครื่องนี้ล่าสุด → เลือก "ส่งข้อมูลเครื่องนี้ขึ้นชีต" (ข้อมูลในชีตจะถูกเขียนทับ)</p>`,
+        [{label:'⬆ ส่งข้อมูลเครื่องนี้ขึ้นชีต',onClick:()=>{closeModal();pushAll({force:true})}},{label:'⬇ ใช้ข้อมูลจาก Google Sheets',cls:'pri',onClick:()=>{closeModal();pullAll()}}]);
+    }else await pushAll({force:true});
+    renderSheets();
+  }catch(e){el.innerHTML=`<span style="color:var(--r)">❌ ${esc(e.message)}</span>`}
+}
+function disconnectSheets(){confirmBox('ยกเลิกการเชื่อมต่อ Google Sheets? (ข้อมูลในเครื่องและในชีตยังอยู่ครบ)',()=>{sync.connected=false;sync.pending=0;sync.lastError='';saveSync();updateInd();renderSheets();toast('ยกเลิกการเชื่อมต่อแล้ว')},'ยกเลิกการเชื่อมต่อ')}
+function gsCode(key){return GS_CODE.replace('__KEY__',String(key||'').replace(/['\\]/g,''))}
+const GS_CODE=String.raw`/**
+ * HomeworkCheck — Google Sheets API
+ * วิธีใช้: เปิด Google Sheets > ส่วนขยาย > Apps Script > วางโค้ดนี้ทั้งหมด > บันทึก
+ *        แล้ว Deploy เป็น "เว็บแอป" (ดำเนินการในฐานะ: ฉัน / ผู้มีสิทธิ์เข้าถึง: ทุกคน)
+ */
+const API_KEY = '__KEY__';   // ต้องตรงกับ "รหัสลับ" ในหน้าเว็บ HomeworkCheck
+const DATA_SHEET = '_hwdata'; // ชีตเก็บข้อมูลดิบ (ซ่อนไว้ อย่าแก้ไข)
+
+function doGet(e) {
+  var p = (e && e.parameter) || {};
+  if (!p.action) return out_({ ok: true, message: 'HomeworkCheck API พร้อมใช้งาน ✅', hasKey: API_KEY.length > 0 });
+  return handle_(p);
+}
+function doPost(e) {
+  var p = {};
+  try { p = JSON.parse(e.postData.contents); } catch (err) {}
+  return handle_(p);
+}
+function out_(o) {
+  return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
+}
+function handle_(p) {
+  if (!API_KEY) return out_({ ok: false, error: 'ยังไม่ได้ตั้งรหัสลับ (API_KEY) ในโค้ด Apps Script' });
+  if (!p.key || p.key !== API_KEY) return out_({ ok: false, error: 'รหัสลับไม่ถูกต้อง' });
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var lock = LockService.getScriptLock();
+  lock.waitLock(25000);
+  try {
+    var meta = getMeta_(ss);
+    if (p.action === 'ping') return out_({ ok: true, name: ss.getName(), url: ss.getUrl(), updatedAt: meta });
+    if (p.action === 'pull') return out_({ ok: true, data: readData_(ss), updatedAt: meta });
+    if (p.action === 'push') {
+      if (!p.force && meta && p.baseAt !== meta)
+        return out_({ ok: false, conflict: true, updatedAt: meta, error: 'ข้อมูลในชีตถูกแก้ไขจากเครื่องอื่น' });
+      var at = new Date().toISOString();
+      writeData_(ss, p.data, at);
+      var t = p.tables || {};
+      Object.keys(t).forEach(function (name) { writeTable_(ss, name, t[name]); });
+      return out_({ ok: true, updatedAt: at, name: ss.getName() });
+    }
+    return out_({ ok: false, error: 'ไม่รู้จักคำสั่ง ' + p.action });
+  } catch (err) {
+    return out_({ ok: false, error: String(err) });
+  } finally {
+    lock.releaseLock();
+  }
+}
+function getMeta_(ss) {
+  var sh = ss.getSheetByName(DATA_SHEET);
+  return sh ? String(sh.getRange(1, 1).getDisplayValue() || '') : '';
+}
+function readData_(ss) {
+  var sh = ss.getSheetByName(DATA_SHEET);
+  if (!sh || sh.getLastRow() < 2) return null;
+  var v = sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues();
+  return JSON.parse(v.map(function (r) { return String(r[0]).substring(1); }).join(''));
+}
+function writeData_(ss, data, at) {
+  var sh = ss.getSheetByName(DATA_SHEET);
+  if (!sh) { sh = ss.insertSheet(DATA_SHEET); sh.hideSheet(); }
+  var s = JSON.stringify(data), rows = [];
+  for (var i = 0; i < s.length; i += 40000) rows.push(['x' + s.substring(i, i + 40000)]);
+  sh.clear();
+  sh.getRange(1, 1).setNumberFormat('@').setValue(at);
+  if (rows.length) sh.getRange(2, 1, rows.length, 1).setNumberFormat('@').setValues(rows);
+}
+function writeTable_(ss, name, rows) {
+  var sh = ss.getSheetByName(name) || ss.insertSheet(name);
+  sh.clear();
+  if (!rows || !rows.length) return;
+  var w = rows.reduce(function (m, r) { return Math.max(m, r.length); }, 0);
+  var vals = rows.map(function (r) {
+    var a = r.slice(); while (a.length < w) a.push('');
+    return a.map(function (x) { return x == null ? '' : x; });
+  });
+  sh.getRange(1, 1, vals.length, w).setNumberFormat('@').setValues(vals);
+  sh.getRange(1, 1, 1, w).setFontWeight('bold').setBackground('#e8e6ff');
+  sh.setFrozenRows(1);
+  sh.autoResizeColumns(1, w);
+}
+`;
+function copyCode(){const v=$('#gsCode').textContent;(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast('คัดลอกโค้ดแล้ว')).catch(()=>{const r=document.createRange();r.selectNodeContents($('#gsCode'));const s=getSelection();s.removeAllRanges();s.addRange(r);document.execCommand('copy');toast('คัดลอกโค้ดแล้ว')})}
+function renderSheets(){
+  if(!sync.key)sync.key=genKey(),saveSync();
+  const on=sync.connected;
+  const ago=t=>t?new Date(t).toLocaleString('th-TH',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'-';
+  $('#app').innerHTML=`
+  <div class="card">
+    <h3>☁️ การเชื่อมต่อ Google Sheets</h3>
+    <div class="info">
+      <span>สถานะ</span><span>${on?(sync.lastError?'<span class="dot" style="background:var(--y)"></span><b>เชื่อมต่อแล้ว (ซิงก์ล่าสุดไม่สำเร็จ)</b>':'<span class="dot" style="background:var(--g)"></span><b style="color:var(--g)">ซิงก์แล้ว</b>'):'<span class="dot" style="background:#bbb"></span>ยังไม่เชื่อมต่อ'}</span>
+      <span>ไฟล์ชีต</span><span>${sync.sheetName?(sync.sheetUrl?`<a href="${esc(sync.sheetUrl)}" target="_blank">${esc(sync.sheetName)} ↗</a>`:esc(sync.sheetName)):'-'}</span>
+      <span>ซิงก์ล่าสุด</span><span>${ago(sync.lastSync)}</span>
+      <span>รายการรอส่ง</span><span>${sync.pending||0} รายการ</span>
+    </div>
+    ${sync.lastError&&on?`<div class="warn" style="background:#fee2e2;border-color:#fca5a5">❌ <b>ข้อผิดพลาดล่าสุด:</b> ${esc(sync.lastError)}</div>`:''}
+    <div class="warn">⚠️ <b>ข้อมูลหลักเก็บในเครื่องนี้</b> แล้วคัดลอกขึ้น Google Sheets อัตโนมัติ (ส่งหลังแก้ไขประมาณ 3 วินาที) ถ้าออฟไลน์ ระบบจะเก็บไว้เป็น "รายการรอส่ง" แล้วส่งเมื่อกด ซิงก์ตอนนี้<br>
+    <b>สำคัญ:</b> อย่าแชร์รหัสลับให้คนอื่นนอกจากครูที่ใช้ข้อมูลร่วมกัน ใครมี URL + รหัสลับ จะอ่านและแก้ข้อมูลได้</div>
+    <label class="sw"><input type="checkbox" ${sync.auto?'checked':''} onchange="sync.auto=this.checked;saveSync();if(this.checked&&sync.pending)scheduleSync()"> ซิงก์อัตโนมัติเมื่อมีการแก้ไข และเมื่อเปิดหน้าเว็บ</label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button class="btn pri" onclick="smartSync()" ${on?'':'disabled'}>🔄 ซิงก์ตอนนี้</button>
+      <button class="btn" onclick="confirmBox('ดึงข้อมูลทั้งหมดจาก Google Sheets มาแทนข้อมูลในเครื่องนี้?',()=>pullAll(),'ดึงข้อมูล')" ${on?'':'disabled'}>⬇ ดึงข้อมูลทั้งหมดจากชีตใหม่</button>
+      <button class="btn" onclick="confirmBox('ส่งข้อมูลทั้งหมดในเครื่องนี้ขึ้นไปเขียนทับข้อมูลใน Google Sheets?',()=>pushAll({force:true}),'ส่งข้อมูล')" ${on?'':'disabled'}>⬆ ส่งข้อมูลทั้งหมดขึ้นชีต</button>
+      <button class="btn danger" onclick="disconnectSheets()" ${on?'':'disabled'}>ยกเลิกการเชื่อมต่อ</button>
+    </div>
+    <p class="sm mut" style="margin-bottom:0">ในชีตจะมีแท็บ "นักเรียน", "สรุปงาน", "การส่งงาน" (เปิดดู/กรอง/ทำกราฟได้) และแท็บซ่อน "_hwdata" ที่ใช้ซิงก์ ห้ามแก้ไขแท็บนี้</p>
+  </div>
+
+  <div class="card">
+    <h3>🔗 ตั้งค่าการเชื่อมต่อ</h3>
+    <label class="l">URL ของเว็บแอป (Web app URL)</label>
+    <input class="f" id="gsUrl" value="${esc(sync.url||'')}" placeholder="https://script.google.com/macros/s/xxxxxxxx/exec">
+    <label class="l">รหัสลับ (ต้องตรงกับในโค้ด Apps Script)</label>
+    <div style="display:flex;gap:8px"><input class="f" id="gsKey" value="${esc(sync.key)}" oninput="$('#gsCode').textContent=gsCode(this.value)"><button class="btn" onclick="const k=genKey();$('#gsKey').value=k;$('#gsCode').textContent=gsCode(k);if(!sync.connected){sync.key=k;saveSync()}">🎲 สุ่มใหม่</button></div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center">
+      <button class="btn" onclick="testConn()">🧪 ทดสอบการเชื่อมต่อ</button>
+      <button class="btn pri" onclick="connectSheets()">💾 บันทึกและเชื่อมต่อใหม่</button>
+      <span id="gsTest" class="sm"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📘 วิธีติดตั้ง (ทำครั้งเดียว ประมาณ 10 นาที)</h3>
+    <ol class="steps">
+      <li>สร้าง Google Sheets ใหม่ที่ <a href="https://sheets.new" target="_blank">sheets.new</a> แล้วตั้งชื่อ เช่น <i>"HomeworkCheck ข้อมูลส่งการบ้าน"</i></li>
+      <li>ที่ชีต ไปที่เมนู <b>ส่วนขยาย (Extensions) → Apps Script</b> ลบโค้ดเดิมทั้งหมด แล้ววางโค้ดนี้ (ใส่รหัสลับจากช่องด้านบนไว้ให้แล้ว) จากนั้นกด 💾 บันทึก
+        <pre class="code" id="gsCode"></pre>
+        <button class="btn sm" onclick="copyCode()">📋 คัดลอกโค้ด</button></li>
+      <li>กดปุ่มสีน้ำเงิน <b>ทำให้ใช้งานได้ (Deploy) → การทำให้ใช้งานได้รายการใหม่ (New deployment)</b> → กดไอคอน ⚙️ แล้วเลือก <b>เว็บแอป (Web app)</b></li>
+      <li>ตั้งค่า 2 ช่องนี้ให้ถูก (สำคัญที่สุด) แล้วกด <b>ทำให้ใช้งานได้</b>
+        <div class="tw" style="margin-top:6px"><table><thead><tr><th>ช่อง</th><th>✅ ต้องเลือก</th><th>❌ ห้ามเลือก</th></tr></thead><tbody>
+        <tr><td>ดำเนินการในฐานะ (Execute as)</td><td><b>ฉัน (อีเมลของคุณ)</b></td><td>ผู้ใช้ที่เข้าถึงเว็บแอป</td></tr>
+        <tr><td>ผู้มีสิทธิ์เข้าถึง (Who has access)</td><td><b>ทุกคน (Anyone)</b></td><td>ทุกคนที่มีบัญชี Google / เฉพาะตัวฉันเอง</td></tr></tbody></table></div></li>
+      <li>กด <b>ให้สิทธิ์เข้าถึง</b> → เลือกบัญชี Google → ถ้าขึ้นว่า <i>"Google ยังไม่ได้ยืนยันแอปนี้"</i> ให้กด <b>ขั้นสูง → ไปที่ … (ไม่ปลอดภัย) → อนุญาต</b> (สคริปต์นี้เป็นของเราเองและเข้าถึงได้แค่ชีตนี้)</li>
+      <li>คัดลอก <b>URL ของเว็บแอป</b> (ลงท้ายด้วย <code>/exec</code>) มาวางในช่องด้านบน → กด <b>ทดสอบ</b> → กด <b>บันทึกและเชื่อมต่อใหม่</b></li>
+      <li><b>เครื่องอื่น / ครูร่วม:</b> เปิดเว็บนี้ ใส่ URL และรหัสลับเดียวกัน → เชื่อมต่อ → เลือก <i>"ใช้ข้อมูลจาก Google Sheets"</i></li>
+    </ol>
+    <div class="tip">💡 ถ้าแก้โค้ด Apps Script ภายหลัง ต้องกด <b>ทำให้ใช้งานได้ → จัดการการทำให้ใช้งานได้ → ✏️ แก้ไข → เวอร์ชัน: เวอร์ชันใหม่</b> แล้ว URL จะยังเหมือนเดิม<br>
+    💡 ถ้าเปลี่ยนรหัสลับ ต้องแก้ทั้งในช่องด้านบนและบรรทัด <code>API_KEY</code> ในโค้ด แล้ว Deploy เวอร์ชันใหม่</div>
+  </div>
+
+  <div class="card">
+    <h3>🛠 แก้ปัญหาการเชื่อมต่อ</h3>
+    <div class="tip">วิธีตรวจเร็วที่สุด: นำ URL ของเว็บแอปไปเปิดใน<b>หน้าต่างไม่ระบุตัวตน</b> (Chrome: Ctrl+Shift+N / มือถือ: แท็บไม่ระบุตัวตน) ถ้าตั้งค่าถูกต้องจะเห็นข้อความ <b>"HomeworkCheck API พร้อมใช้งาน ✅"</b> โดยไม่ต้องล็อกอิน<br>
+    <button class="btn sm" style="margin-top:6px" onclick="const u=$('#gsUrl').value.trim();if(!u)return toast('กรุณากรอก URL ก่อน');window.open(u,'_blank')">🔗 เปิด URL ในแท็บใหม่</button></div>
+    <div class="acc">
+      <details open>
+        <summary>🔒 ขึ้น "เชื่อมต่อไม่ได้ — ตรวจ URL, อินเทอร์เน็ต และสิทธิ์" / เปิด URL แล้วเจอหน้าล็อกอิน Google</summary>
+        <div class="ab">
+          <p style="margin:0 0 8px">สาเหตุที่พบบ่อยที่สุด: ตั้งสิทธิ์เป็น <b>"ทุกคนที่มีบัญชี Google"</b> หรือ <b>"ดำเนินการในฐานะ: ผู้ใช้ที่เข้าถึงเว็บแอป"</b> ทำให้ Google บังคับให้ล็อกอินก่อน หน้าเว็บจึงส่งข้อมูลไม่ได้</p>
+          <div class="tw"><table><thead><tr><th>ช่อง</th><th>✅ ถูก</th><th>❌ ผิด</th></tr></thead><tbody>
+            <tr><td>ดำเนินการในฐานะ</td><td><b>ฉัน (อีเมลของคุณ)</b></td><td>ผู้ใช้ที่เข้าถึงเว็บแอป</td></tr>
+            <tr><td>ผู้มีสิทธิ์เข้าถึง</td><td><b>ทุกคน</b></td><td>ทุกคนที่มีบัญชี Google · เฉพาะตัวฉันเอง</td></tr></tbody></table></div>
+          <b>วิธีแก้:</b>
+          <ol>
+            <li>เปิด Apps Script → กดปุ่มสีน้ำเงิน <b>ทำให้ใช้งานได้ → จัดการการทำให้ใช้งานได้</b></li>
+            <li>เลือกรายการที่ใช้งานอยู่ทางซ้าย → กดไอคอน ✏️ <b>(แก้ไข)</b> มุมขวาบน</li>
+            <li><b>เวอร์ชัน:</b> เลือก <b>เวอร์ชันใหม่</b></li>
+            <li><b>ดำเนินการในฐานะ:</b> เลือก <b>ฉัน (อีเมลของคุณ)</b> ← ต้องเปลี่ยนช่องนี้ก่อน ไม่อย่างนั้นจะไม่มีตัวเลือก "ทุกคน"</li>
+            <li><b>ผู้มีสิทธิ์เข้าถึง:</b> เลือก <b>ทุกคน</b> (ไม่ใช่ "ทุกคนที่มีบัญชี Google")</li>
+            <li>กด <b>ทำให้ใช้งานได้</b> → ถ้าขึ้นหน้าขอสิทธิ์ให้กดอนุญาต (ดูหัวข้อ "Google ยังไม่ได้ยืนยันแอปนี้" ด้านล่าง)</li>
+            <li>กลับมาหน้านี้ → กด <b>ทดสอบการเชื่อมต่อ</b> (URL เดิมใช้ต่อได้)</li>
+          </ol>
+          <p class="sm mut" style="margin:0">ตรวจเพิ่ม: อินเทอร์เน็ตใช้ได้ไหม · URL ต้องขึ้นต้น <code>https://script.google.com/macros/s/</code> และลงท้าย <code>/exec</code> · ไม่มีช่องว่างหน้า/หลัง URL</p>
+        </div>
+      </details>
+      <details>
+        <summary>🚫 ไม่มีตัวเลือก "ทุกคน" ให้เลือก</summary>
+        <div class="ab">
+          <ol>
+            <li>ตรวจว่าช่อง <b>ดำเนินการในฐานะ</b> เป็น <b>"ฉัน"</b> แล้ว ถ้าเป็น "ผู้ใช้ที่เข้าถึงเว็บแอป" จะไม่มีตัวเลือก "ทุกคน"</li>
+            <li>ถ้าใช้<b>บัญชีของโรงเรียน/หน่วยงาน</b> (เช่น @xxx.ac.th หรือ @obec.go.th) ผู้ดูแลระบบอาจปิดการแชร์ออกภายนอกไว้ ทำให้มีแค่ "ทุกคนใน [ชื่อองค์กร]"</li>
+          </ol>
+          <b>วิธีแก้:</b>
+          <ul>
+            <li>แนะนำ: ใช้ <b>บัญชี Gmail ส่วนตัว (@gmail.com)</b> สร้าง Google Sheets และ Apps Script ใหม่ แล้วทำขั้นตอนติดตั้งอีกครั้ง</li>
+            <li>หรือขอให้ผู้ดูแลระบบของโรงเรียนเปิดสิทธิ์ให้แชร์เว็บแอป Apps Script กับ "ทุกคน" ได้</li>
+            <li>ถ้าต้องการให้บัญชีโรงเรียนเปิดดูชีตได้ ให้แชร์ไฟล์ชีตจาก Gmail ส่วนตัวไปให้บัญชีโรงเรียนอีกที</li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>⚠️ ขึ้นหน้า "Google ยังไม่ได้ยืนยันแอปนี้" / ต้องให้สิทธิ์</summary>
+        <div class="ab">
+          <p style="margin:0 0 6px">เป็นเรื่องปกติ เพราะสคริปต์นี้เราสร้างเอง ไม่ได้ส่งให้ Google ตรวจ โค้ดนี้เข้าถึงได้แค่ไฟล์ชีตที่ผูกไว้เท่านั้น</p>
+          <ol>
+            <li>กด <b>ตรวจสอบสิทธิ์ (Review permissions)</b> → เลือกบัญชี Google ของคุณ</li>
+            <li>เจอหน้า "Google ยังไม่ได้ยืนยันแอปนี้" → กดลิงก์ <b>ขั้นสูง (Advanced)</b> มุมซ้ายล่าง</li>
+            <li>กด <b>ไปที่ [ชื่อโปรเจกต์] (ไม่ปลอดภัย)</b></li>
+            <li>กด <b>อนุญาต (Allow)</b></li>
+          </ol>
+          <p class="sm mut" style="margin:0">ถ้าไม่มีลิงก์ "ขั้นสูง" ให้กด แปลว่าบัญชีองค์กรบล็อกไว้ → ใช้ Gmail ส่วนตัวแทน (ดูหัวข้อด้านบน)</p>
+        </div>
+      </details>
+      <details>
+        <summary>🔑 ขึ้น "รหัสลับไม่ถูกต้อง"</summary>
+        <div class="ab">
+          <ol>
+            <li>เปิด Apps Script ดูบรรทัด <code>const API_KEY = '...';</code> ต้องตรงกับช่อง <b>รหัสลับ</b> ในหน้านี้ทุกตัวอักษร (ตัวพิมพ์เล็ก-ใหญ่ต่างกัน ห้ามมีช่องว่าง)</li>
+            <li>วิธีง่ายสุด: กด <b>📋 คัดลอกโค้ด</b> ในหน้านี้ใหม่ (มีรหัสลับใส่ไว้แล้ว) → วางทับโค้ดเดิมทั้งหมดใน Apps Script → 💾 บันทึก</li>
+            <li>ทุกครั้งที่แก้โค้ด ต้อง Deploy <b>เวอร์ชันใหม่</b> (ทำให้ใช้งานได้ → จัดการ… → ✏️ → เวอร์ชันใหม่) ไม่อย่างนั้นเว็บแอปยังใช้โค้ดเก่า</li>
+            <li>ถ้าเพิ่งกด 🎲 สุ่มใหม่ รหัสในช่องจะเปลี่ยน ต้องคัดลอกโค้ดไปวางใหม่และ Deploy อีกครั้ง</li>
+          </ol>
+        </div>
+      </details>
+      <details>
+        <summary>❓ ขึ้น "ไม่พบฟังก์ชันสคริปต์: doGet" หรือ "ยังไม่ได้ตั้งรหัสลับ"</summary>
+        <div class="ab">
+          <ul>
+            <li><b>ไม่พบฟังก์ชัน doGet / doPost:</b> วางโค้ดไม่ครบ หรือยังไม่ได้กด 💾 บันทึก ก่อน Deploy → คัดลอกโค้ดจากหน้านี้ไปวางใหม่ทั้งหมด บันทึก แล้ว Deploy เวอร์ชันใหม่</li>
+            <li>ตรวจว่าวางโค้ดใน Apps Script ที่เปิดจาก<b>เมนูของไฟล์ชีตนั้น</b> (ส่วนขยาย → Apps Script) ไม่ใช่โปรเจกต์แยกที่สร้างจาก script.google.com</li>
+            <li><b>ยังไม่ได้ตั้งรหัสลับ:</b> บรรทัด <code>API_KEY</code> ว่างอยู่ (<code>''</code>) → ใส่รหัสลับให้ตรงกับหน้านี้ บันทึก แล้ว Deploy เวอร์ชันใหม่</li>
+            <li>ถ้ามีหลายไฟล์ .gs ในโปรเจกต์ ให้ลบไฟล์อื่นที่มีฟังก์ชัน doGet / doPost ซ้ำออก</li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>🔄 แก้สิทธิ์/แก้โค้ดแล้ว แต่ผลยังเหมือนเดิม</summary>
+        <div class="ab">
+          <ol>
+            <li>Apps Script <b>ไม่อัปเดตเว็บแอปเอง</b> ต้องไปที่ ทำให้ใช้งานได้ → <b>จัดการการทำให้ใช้งานได้</b> → ✏️ → เวอร์ชัน: <b>เวอร์ชันใหม่</b> → ทำให้ใช้งานได้</li>
+            <li>อย่ากด "การทำให้ใช้งานได้รายการใหม่" ซ้ำ เพราะจะได้ <b>URL ใหม่</b> ถ้าทำไปแล้ว ให้คัดลอก URL ใหม่มาใส่ในหน้านี้</li>
+            <li>ใช้ URL ที่ลงท้าย <code>/exec</code> เท่านั้น (URL <code>/dev</code> ใช้ได้เฉพาะเจ้าของที่ล็อกอินอยู่)</li>
+            <li>ทดสอบในหน้าต่างไม่ระบุตัวตน หรือรีเฟรชหน้านี้ (Ctrl+F5) แล้วลองใหม่</li>
+          </ol>
+        </div>
+      </details>
+      <details>
+        <summary>📄 ขึ้น "ขออภัย ไม่สามารถเปิดไฟล์ได้ในขณะนี้"</summary>
+        <div class="ab">
+          <ul>
+            <li>มักเกิดตอน<b>ล็อกอิน Google หลายบัญชีพร้อมกัน</b>ในเบราว์เซอร์เดียว → เปิด URL ในหน้าต่างไม่ระบุตัวตน หรือออกจากระบบบัญชีอื่นก่อน</li>
+            <li>ตรวจว่า URL ไม่มี <code>/u/0/</code> หรือ <code>/u/1/</code> อยู่ข้างใน ถ้ามีให้ลบส่วนนั้นออก ให้เหลือรูปแบบ <code>https://script.google.com/macros/s/…/exec</code></li>
+            <li>URL อาจคัดลอกไม่ครบ → กลับไปคัดลอกจาก จัดการการทำให้ใช้งานได้ → ช่อง <b>เว็บแอป URL</b> ใหม่</li>
+            <li>ถ้า Deploy ถูกเก็บถาวร (Archive) หรือลบไปแล้ว URL นั้นจะใช้ไม่ได้ → Deploy ใหม่แล้วใช้ URL ใหม่</li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>🐢 บันทึกช้า / หมดเวลาเชื่อมต่อ</summary>
+        <div class="ab">
+          <ul>
+            <li>การซิงก์แต่ละครั้งใช้เวลา 2–10 วินาทีตามปกติ (Google ต้องเขียนทุกแท็บใหม่) ข้อมูลยัง<b>บันทึกในเครื่องทันที</b> ไม่หายแน่นอน</li>
+            <li>ถ้าอินเทอร์เน็ตช้าหรือหลุด ข้อมูลจะค้างเป็น "รายการรอส่ง" → เมื่อเน็ตกลับมาให้กด <b>🔄 ซิงก์ตอนนี้</b></li>
+            <li>ถ้าข้อมูลเยอะมาก (หลายห้อง หลายร้อยงาน) ให้ปิด "ซิงก์อัตโนมัติ" ระหว่างเช็ค แล้วกดซิงก์ตอนเช็คเสร็จครั้งเดียว</li>
+            <li>Google จำกัดการใช้งาน Apps Script ต่อวัน ถ้าซิงก์ถี่มากอาจถูกพักชั่วคราว → รอสักครู่แล้วลองใหม่</li>
+            <li>สำรองข้อมูลเป็นไฟล์ .json ในหน้า ⚙️ ตั้งค่า ไว้เป็นระยะเพื่อความปลอดภัย</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>`;
+  $('#gsCode').textContent=gsCode(sync.key);
+}
+
+db.settings=db.settings||{};db.cur=db.cur||{};
+render();
+if(sync.connected&&sync.auto)setTimeout(()=>smartSync({silent:true}),800);
+</script>
+</body>
+</html>
